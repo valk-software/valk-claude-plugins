@@ -147,6 +147,28 @@ grave isso — quem aprovou, quando, e o que foi recusado no caminho. É a
 informação que mais importa reconstituir depois, e era a única que o desenho
 antigo deixava sumir.
 
+## Analisar um vídeo de referência
+
+Quando alguém manda um link de Reel / TikTok / Short e quer saber **por que
+aquilo funcionou** — paleta, ritmo de corte, tipografia, timing do gancho —, não
+adianta ler a legenda. Isso só sai olhando os frames.
+
+```bash
+python ${CLAUDE_PLUGIN_ROOT}/scripts/ref-analyzer/ref_analyzer.py <url> --frames 16
+```
+
+Ele baixa o vídeo e monta um pacote em `./ref-analyzer/<slug>/` com frames,
+metadados e legenda. Você lê o `README.md` do pacote **mais os frames** e
+escreve o cartão.
+
+**O cartão vai para o documento "Receitas visuais de vídeo" no hub, e ele é
+ACUMULADO** — leia o documento inteiro e devolva o texto todo mais o cartão
+novo. Detalhes em `${CLAUDE_PLUGIN_ROOT}/scripts/ref-analyzer/README.md`.
+
+> É a única peça do Opensquad que pede Python na máquina. Se não tiver, diga
+> isso em vez de tentar descrever o vídeo pelo título — um cartão inventado
+> contamina todo run que ler o banco depois.
+
 ## Regras críticas
 
 - **Nunca pule um checkpoint.** Ação irreversível e para fora — publicar,
@@ -177,6 +199,10 @@ SQUADS
 
 EMPRESA
   /opensquad show-company     o perfil da VALK que todo squad carrega
+
+FERRAMENTAS
+  ref-analyzer                manda um link de vídeo e eu destilo a receita
+                              visual (paleta, corte, tipografia, gancho)
 
 ONDE AS COISAS MORAM
   O motor está neste pacote. Os squads e o que eles produzem estão no

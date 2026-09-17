@@ -1,3 +1,8 @@
 node_modules/
 .DS_Store
 **/evals/results/
+
+# pacotes do ref-analyzer: video baixado e frames soltos, material bruto pesado.
+# O que vale e o cartao destilado, e ele vive no hub.
+**/ref-analyzer/*/
+!plugins/opensquad/scripts/ref-analyzer/

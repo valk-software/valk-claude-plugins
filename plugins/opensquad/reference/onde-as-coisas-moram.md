@@ -24,9 +24,15 @@ Isto é motor. Muda uma vez por mês, e chega por atualização do plugin.
 | Motor de skills | `${CLAUDE_PLUGIN_ROOT}/reference/skills.engine.md` |
 | Persona do arquiteto | `${CLAUDE_PLUGIN_ROOT}/reference/architect.agent.yaml` |
 | Best-practices por formato | `${CLAUDE_PLUGIN_ROOT}/reference/best-practices/{formato}.md` |
+| Analisador de vídeo de referência | `${CLAUDE_PLUGIN_ROOT}/scripts/ref-analyzer/` |
 
 Sempre `${CLAUDE_PLUGIN_ROOT}`, nunca caminho relativo ao projeto: um plugin roda
 a partir de qualquer pasta, inclusive de uma pasta vazia.
+
+**Leia, nunca escreva.** A pasta do plugin é substituída inteira a cada
+atualização: o que você gravar aqui some sem aviso na próxima versão. Isso vale
+inclusive para a saída do `ref-analyzer`, que por isso cai na pasta de onde
+você rodou (`./ref-analyzer/`) e não ao lado do script.
 
 ## O que vem do HUB (muda toda semana, igual para todo mundo, na hora)
 
@@ -89,6 +95,27 @@ alucinada". A regra continua, e a ferramenta é ainda melhor que o bash:
 - **Existe?** `ler_documento` devolve o texto inteiro, ou diz que não achou.
 
 Nenhuma das duas pede `test -s`, e nenhuma das duas aceita suposição.
+
+## Escrever no banco de conhecimento: um documento não escreve como o outro
+
+`corrigir_documento` **substitui o documento inteiro**. Por isso, antes de
+escrever em qualquer documento de conhecimento, pergunte de que tipo ele é — a
+resposta está no cabeçalho do próprio documento, que diz qual é o contrato.
+
+| Tipo | O que significa | Como escrever |
+|---|---|---|
+| **ACUMULADO** | cada run ACRESCENTA, nada some | `ler_documento` inteiro → `corrigir_documento` com o texto TODO **mais** o novo |
+| **REESCRITO** | o conteúdo do momento substitui o anterior | `corrigir_documento` com o estado atual, preservando as colunas de histórico |
+
+O exemplo que justifica esta seção: "Receitas visuais de vídeo" é acumulado (13
+cartões destilados de 13 vídeos assistidos quadro a quadro) e "Repertório
+cultural" é reescrito (as pautas do momento substituem as antigas, mas a coluna
+"Usado" nunca é apagada, porque é ela que impede repetir pauta). Tratar os dois
+como "sobrescreve" apagaria meses de trabalho, e ninguém perceberia até alguém
+procurar um cartão que não está mais lá.
+
+Na dúvida, leia primeiro. Ler custa uma chamada; reescrever por cima custa o que
+não dá para refazer.
 
 ## A memória do squad
 

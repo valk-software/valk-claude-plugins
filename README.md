@@ -62,7 +62,7 @@ continuarem atendidas:
 | Exigência | Como está aqui |
 |---|---|
 | Plugin privado usa caminho **relativo** dentro do repositório do marketplace | `"source": "./plugins/opensquad"` |
-| Pacote **não** pode ter pasta de executáveis no topo | não existe `bin/`; o que houver de script vai para `scripts/` |
+| Pacote **não** pode ter pasta de executáveis no topo | não existe `bin/`; os scripts moram em `plugins/opensquad/scripts/` |
 | Atualização só chega quando a **versão muda** | `version` declarada nos dois manifestos, e `claude plugin tag` recusa publicar se eles discordarem |
 
 ### O conector vem junto
@@ -91,6 +91,10 @@ vez de tentar adivinhar.
 ## Por que não tem `bin/`
 
 A distribuição por organização **recusa** um pacote com pasta de executáveis no
-topo. O que houver de script mora em `scripts/`, referenciado por
+topo. Os scripts moram em `plugins/opensquad/scripts/`, referenciados por
 `${CLAUDE_PLUGIN_ROOT}`. Isso está aqui escrito porque é o tipo de restrição que
 custa retrabalho quando é descoberta no fim.
+
+Hoje tem um só: o **ref-analyzer**, que baixa um vídeo de referência e o quebra
+em frames para o modelo destilar a receita visual. É a única peça do Opensquad
+que pede Python na máquina — todo o resto roda só com o conector do hub.

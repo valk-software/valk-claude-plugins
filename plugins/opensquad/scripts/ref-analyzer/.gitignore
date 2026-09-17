@@ -1,0 +1,3 @@
+# ffmpeg shim copiado do imageio-ffmpeg em tempo de execução
+_bin/
+__pycache__/
