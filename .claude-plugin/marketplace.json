@@ -1,0 +1,27 @@
+{
+  "name": "valk",
+  "owner": {
+    "name": "VALK",
+    "url": "https://valkbr.com"
+  },
+  "description": "As ferramentas internas da VALK, distribuídas para a organização.",
+  "metadata": {
+    "pluginRoot": "./plugins"
+  },
+  "plugins": [
+    {
+      "name": "opensquad",
+      "source": "./plugins/opensquad",
+      "displayName": "Opensquad",
+      "description": "O motor de squads de agentes da VALK. Cria e roda squads; as definições vivem no Valk Hub, não no pacote.",
+      "version": "2.0.0",
+      "author": {
+        "name": "VALK",
+        "url": "https://valkbr.com"
+      },
+      "repository": "https://github.com/valk-software/valk-claude-plugins",
+      "keywords": ["squads", "agentes", "conteudo", "valk"],
+      "category": "productivity"
+    }
+  ]
+}

@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "valk-hub-squads": {
+      "type": "http",
+      "url": "https://hub.valkbr.com/api/mcp/squads"
+    }
+  }
+}
