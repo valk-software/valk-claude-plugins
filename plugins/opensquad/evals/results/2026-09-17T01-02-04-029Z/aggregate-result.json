@@ -1,0 +1,909 @@
+{
+  "schemaVersion": 1,
+  "claudeVersion": "2.1.274",
+  "startedAt": "2026-09-17T01:02:04.029Z",
+  "durationSeconds": 436,
+  "costUsd": 3.3173165,
+  "partial": false,
+  "suite": {
+    "root": "C:\\Repos\\Valk\\valk-claude-plugins\\plugins\\opensquad",
+    "ablation": "with-without",
+    "threshold": 1,
+    "concurrency": 2,
+    "plugins": [
+      {
+        "name": "opensquad",
+        "version": "2.0.1",
+        "path": "C:\\Repos\\Valk\\valk-claude-plugins\\plugins\\opensquad"
+      }
+    ]
+  },
+  "cases": [
+    {
+      "name": "monta-um-squad-novo",
+      "dir": "evals\\monta-um-squad-novo",
+      "source": "prose",
+      "promptMarkdown": "Toda semana a gente repete a mesma coisa: pesquisa pauta, escreve, alguém revisa e aí publica. Queria montar um time de agentes que faça esse caminho sozinho.",
+      "runsPerCase": 3,
+      "timeoutSeconds": 300,
+      "maxTurns": 6,
+      "graders": [
+        {
+          "name": "criteria",
+          "type": "llm",
+          "weight": 1,
+          "graderMarkdown": "A pessoa descreveu um processo repetitivo em etapas e quer automatizá-lo com\nagentes, sem usar a palavra \"squad\".\n\nPASS se a resposta trata isso como criação de um squad e começa a descoberta —\nfazendo pergunta sobre o processo, ou explicando as fases de criação.\n\nFAIL se a resposta entrega um plano genérico de automação sem ligar a squad\nnenhum, ou se sai escrevendo conteúdo em vez de montar o time.",
+          "config": {
+            "criteria": "A pessoa descreveu um processo repetitivo em etapas e quer automatizá-lo com\nagentes, sem usar a palavra \"squad\".\n\nPASS se a resposta trata isso como criação de um squad e começa a descoberta —\nfazendo pergunta sobre o processo, ou explicando as fases de criação.\n\nFAIL se a resposta entrega um plano genérico de automação sem ligar a squad\nnenhum, ou se sai escrevendo conteúdo em vez de montar o time.",
+            "focus": "last_message"
+          }
+        },
+        {
+          "name": "skill-disparou",
+          "type": "tool_used",
+          "weight": 1,
+          "config": {
+            "tool": "Skill",
+            "input_match": "\"skill\"\\s*:\\s*\"(?:[\\w-]+:)?opensquad\""
+          }
+        }
+      ],
+      "arms": {
+        "with": [
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 5,
+            "costUsd": 0.14851850000000003,
+            "judgeCostUsd": 0.0022890000000000002,
+            "durationSeconds": 27,
+            "startedAt": "2026-09-17T01:02:04.051Z",
+            "error": null,
+            "tracePath": "C:\\Users\\felps\\AppData\\Local\\Temp\\claude-eval-yv3206\\out\\trace.jsonl",
+            "skippedPaidGraders": false,
+            "mocks": {
+              "servers": [
+                {
+                  "server": "plugin_opensquad_valk-hub-squads",
+                  "kind": "shadow",
+                  "withheld": true,
+                  "tools": []
+                }
+              ],
+              "warnings": [
+                "mocks: \"plugin:opensquad:valk-hub-squads\" has no mock and is NOT started — its tools are unavailable this run; add mocks/<server>/ to mock it, or pass --allow-real-servers to run the plugin's real server (as you, outside the sandbox)"
+              ],
+              "calls": {
+                "total": 0,
+                "errors": 0,
+                "unmocked": [],
+                "costUsd": 0,
+                "replay": {
+                  "hits": 0,
+                  "misses": 0
+                }
+              }
+            },
+            "graders": [
+              {
+                "name": "criteria",
+                "passed": true,
+                "weight": 1,
+                "explanation": "judge votes: PASS PASS PASS",
+                "withOnly": false,
+                "scored": true,
+                "judgeVotes": [
+                  true,
+                  true,
+                  true
+                ],
+                "evidence": "Parei antes de começar, e vou explicar por quê.\n\n## O conector do hub não está na sessão\n\nO Opensquad inteiro depende do conector **valk-hub-squads** (`https://hub.valkbr.com/api/mcp/squads`). Procurei as ferramentas dele nesta sessão — `listar_squads`, `ver_squad`, `publicar_squad`, `contexto_da_empresa`, `registrar_execucao` — e nenhuma está disponível.\n\nA própria skill manda parar nesse caso, e a razão é boa: sem o hub eu teria que inventar o contexto da VALK (tom, público, produto) e o squad nasceria como arquivo na sua máquina. Aí ele não é um squad — é um rascunho que morre no seu disco e que ninguém mais consegue rodar. É exatamente o problema que esse desenho existe para resolver.\n\n## O que destrava\n\nO conector vem no pacote e pede autorização na primeira vez. Então provavelmente é um destes:\n\n- a autorização do `valk-hub-squads` nunca foi concedida nesta máquina/sessão\n- o plugin está instalado mas o MCP não subiu — vale checar em `/mcp`\n- a sessão precisa reiniciar depois da instalação do plugin\n\n## Enquanto isso\n\nSeu caso é bem claro e eu já registrei o formato: **pesquisa de pauta → escrita → revisão → publicação**, semanal. Isso é um pipeline de quatro passos com pelo menos um checkpoint humano obrigatório na publicação (ação irreversível e para fora — sai só depois de uma pessoa aprovar).\n\nAssim que o conector estiver de pé, me chama que eu rodo a fase de descoberta: puxo os códigos de squad já existentes pra não colidir, carrego o perfil da empresa e te faço as perguntas uma a uma pra desenhar os quatro agentes. É bem rápido a partir daí.\n\nQuer que eu dê uma olhada no estado do plugin e do MCP pra ajudar a diagnosticar?"
+              },
+              {
+                "name": "skill-disparou",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 1x (expected 1..∞)",
+                "withOnly": true,
+                "scored": false
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 5,
+            "costUsd": 0.16266750000000002,
+            "judgeCostUsd": 0.0026760000000000004,
+            "durationSeconds": 31,
+            "startedAt": "2026-09-17T01:02:04.051Z",
+            "error": null,
+            "tracePath": "C:\\Users\\felps\\AppData\\Local\\Temp\\claude-eval-NG1dz9\\out\\trace.jsonl",
+            "skippedPaidGraders": false,
+            "mocks": {
+              "servers": [
+                {
+                  "server": "plugin_opensquad_valk-hub-squads",
+                  "kind": "shadow",
+                  "withheld": true,
+                  "tools": []
+                }
+              ],
+              "warnings": [
+                "mocks: \"plugin:opensquad:valk-hub-squads\" has no mock and is NOT started — its tools are unavailable this run; add mocks/<server>/ to mock it, or pass --allow-real-servers to run the plugin's real server (as you, outside the sandbox)"
+              ],
+              "calls": {
+                "total": 0,
+                "errors": 0,
+                "unmocked": [],
+                "costUsd": 0,
+                "replay": {
+                  "hits": 0,
+                  "misses": 0
+                }
+              }
+            },
+            "graders": [
+              {
+                "name": "criteria",
+                "passed": true,
+                "weight": 1,
+                "explanation": "judge votes: PASS PASS PASS",
+                "withOnly": false,
+                "scored": true,
+                "judgeVotes": [
+                  true,
+                  true,
+                  true
+                ],
+                "evidence": "Parei antes de construir qualquer coisa, e o motivo é concreto:\n\n**O conector `valk-hub-squads` não está nesta sessão.** Procurei as ferramentas dele (`listar_squads`, `ver_squad`, `contexto_da_empresa`, `guia_dos_squads`, `publicar_squad`) e nenhuma está disponível — as únicas ferramentas externas aqui são `TaskOutput` e `TaskStop`.\n\nSem ele eu não consigo fazer as três coisas que um squad criado direito exige:\n\n- **Contexto da empresa** — tom, público e produto da VALK. Sem isso eu inventaria a voz do conteúdo, e o erro só apareceria na peça pronta.\n- **Guarda de colisão** — conferir os códigos de squad já publicados. Dois squads com o mesmo código é o tipo de problema que ninguém nota até rodarem diferente.\n- **Publicação** — o squad pronto vira uma chamada de `publicar_squad` no Hub. Não existe versão em pasta local; se eu montasse algo aqui, morreria nesta máquina.\n\n## Como destravar\n\nO conector vem no pacote do Opensquad (`https://hub.valkbr.com/api/mcp/squads`) e pede autorização na primeira vez. Vale checar:\n\n1. Se o plugin `opensquad` está habilitado com o MCP ativo (`/mcp` lista os conectores da sessão).\n2. Se a autorização do Hub foi concedida — na primeira vez ele abre um fluxo de OAuth.\n3. Reiniciar a sessão depois de autorizar, para as ferramentas entrarem no contexto.\n\nMe avise quando o `/mcp` mostrar o `valk-hub-squads` conectado que eu retomo daqui.\n\n## O que vem depois, pra você já ir pensando\n\nO ciclo que você descreveu — pesquisa de pauta → redação → revisão → publicação — tem quatro papéis e um ponto sensível: **publicar é ação irreversível e para fora**, então o squad vai ter um checkpoint humano obrigatório antes desse passo. O run para ali esperando alguém aprovar, e isso é desfecho normal, não falha.\n\nQuando o conector subir, a fase de descoberta vai te perguntar coisas como: onde o conteúdo é publicado, quem revisa hoje, o que caracteriza uma pauta boa pra vocês, e se a revisão é de fato humana ou se dá pra um agente fazer a primeira passada. Uma pergunta por vez — não precisa preparar nada."
+              },
+              {
+                "name": "skill-disparou",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 1x (expected 1..∞)",
+                "withOnly": true,
+                "scored": false
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 5,
+            "costUsd": 0.15750000000000003,
+            "judgeCostUsd": 0.002373,
+            "durationSeconds": 28,
+            "startedAt": "2026-09-17T01:02:30.755Z",
+            "error": null,
+            "tracePath": "C:\\Users\\felps\\AppData\\Local\\Temp\\claude-eval-AW3b8m\\out\\trace.jsonl",
+            "skippedPaidGraders": false,
+            "mocks": {
+              "servers": [
+                {
+                  "server": "plugin_opensquad_valk-hub-squads",
+                  "kind": "shadow",
+                  "withheld": true,
+                  "tools": []
+                }
+              ],
+              "warnings": [
+                "mocks: \"plugin:opensquad:valk-hub-squads\" has no mock and is NOT started — its tools are unavailable this run; add mocks/<server>/ to mock it, or pass --allow-real-servers to run the plugin's real server (as you, outside the sandbox)"
+              ],
+              "calls": {
+                "total": 0,
+                "errors": 0,
+                "unmocked": [],
+                "costUsd": 0,
+                "replay": {
+                  "hits": 0,
+                  "misses": 0
+                }
+              }
+            },
+            "graders": [
+              {
+                "name": "criteria",
+                "passed": true,
+                "weight": 1,
+                "explanation": "judge votes: PASS PASS PASS",
+                "withOnly": false,
+                "scored": true,
+                "judgeVotes": [
+                  true,
+                  true,
+                  true
+                ],
+                "evidence": "Seu caso é exatamente o que o Opensquad faz — pesquisa → redação → revisão → publicação é um pipeline de squad clássico, com checkpoint humano na revisão e na publicação. Mas não consigo começar agora.\n\n**O que está bloqueando:** o conector `valk-hub-squads` não está nesta sessão. Verifiquei as ferramentas disponíveis e nenhuma das do hub (`listar_squads`, `ver_squad`, `contexto_da_empresa`, `publicar_squad`, `registrar_execucao`) está carregada.\n\nIsso não é detalhe de encanamento. Sem o hub eu teria que:\n\n- inventar o contexto da VALK (tom, público, produto) — e o erro só apareceria na peça pronta;\n- criar o squad sem checar colisão de código com os que já existem;\n- salvar o resultado na sua máquina, onde ele morre.\n\nO motor é explícito em parar aqui em vez de entregar um squad que parece pronto e não é.\n\n**Como destravar:** o conector vem no próprio pacote do Opensquad e pede autorização na primeira vez (`https://hub.valkbr.com/api/mcp/squads`). Habilite/autorize ele e me chame de novo — se estiver autorizado e ainda assim não aparecer, vale checar se o plugin do Opensquad está ativo nesta sessão.\n\n**Assim que ele estiver de pé**, o caminho é curto: eu puxo o contexto da empresa, listo os squads publicados pra não repetir código, e aí a fase de descoberta te faz umas poucas perguntas — uma de cada vez — sobre coisas que só você sabe: quem decide a pauta, quantas peças por semana, em que canal publica, e quem é a pessoa que aprova antes de ir pro ar. Com isso eu desenho e publico o squad, e ele nasce como rascunho pra você rodar uma vez antes de soltar pro time.\n\nVale já ir pensando nessas quatro respostas — principalmente quem aprova, porque publicação é ação irreversível e pra fora, e nesse ponto o squad sempre vai parar e esperar uma pessoa."
+              },
+              {
+                "name": "skill-disparou",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 1x (expected 1..∞)",
+                "withOnly": true,
+                "scored": false
+              }
+            ]
+          }
+        ],
+        "without": [
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 8,
+            "costUsd": 0.5661905,
+            "judgeCostUsd": 0.013680000000000005,
+            "durationSeconds": 205,
+            "startedAt": "2026-09-17T01:02:35.530Z",
+            "error": null,
+            "tracePath": "C:\\Users\\felps\\AppData\\Local\\Temp\\claude-eval-rxz8w3\\out\\trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "criteria",
+                "passed": true,
+                "weight": 1,
+                "explanation": "judge votes: PASS PASS PASS",
+                "withOnly": false,
+                "scored": true,
+                "judgeVotes": [
+                  true,
+                  true,
+                  true
+                ],
+                "evidence": "Não consigo gravar nada nesta sessão — `Write`, `Edit` e `Bash` estão todos desabilitados, inclusive para subagentes. Só tenho leitura e busca. Então vou te entregar os arquivos aqui prontos para colar; rodando o Claude Code com escrita liberada, eu crio direto nos caminhos.\n\nO desenho é esse: **três agentes fazem o trabalho, um prepara o pacote, e o estado mora em arquivos** — cada semana vira uma pasta `conteudo/2026-W38/` com `pesquisa.md → rascunho.md → revisao.md → final.md`. Isso importa porque cadeia de agente quebra no meio, e com o estado em disco você retoma da etapa que faltou em vez de recomeçar a semana.\n\nDuas escolhas que valem explicar antes dos arquivos:\n\n**O editor não reescreve o texto.** Ele emite parecer; quem aplica é o redator. Se o mesmo agente escreve e aprova, você não tem revisão, tem carimbo.\n\n**Publicar fica atrás de gate humano.** É ação externa e irreversível, e eu ainda não sei para onde vai. O `publicador` monta o pacote e para.\n\n---\n\n### `.claude/agents/pauteiro.md`\n\n```markdown\n---\nname: pauteiro\ndescription: Pesquisa e seleciona pautas da semana, e monta o dossiê de pesquisa com fontes para o redator. Use no início do ciclo semanal de conteúdo.\ntools: WebSearch, WebFetch, Read, Write, Grep, Glob\nmodel: sonnet\n---\n\nVocê é o pauteiro do time de conteúdo. Seu trabalho é achar do que vale a pena falar\nesta semana e entregar material suficiente para alguém escrever sem pesquisar de novo.\n\nAntes de tudo, leia `conteudo/GUIA-DE-ESTILO.md` para saber público, tom e temas fora\nde escopo. Leia também os títulos das últimas 4 edições em `conteudo/` para não repetir\npauta.\n\nVocê tem dois entregáveis, e o prompt diz qual é a vez:\n\n## Entregável A — shortlist de pautas\n\nEscreva em `conteudo/<SEMANA>/pesquisa.md`:\n\n- 5 candidatas, cada uma com: ângulo em uma frase, por que agora (o gancho temporal),\n  para quem interessa, e 2–3 fontes que sustentam o ângulo (URL + o que a fonte diz).\n- Uma recomendação sua no final, com o motivo em duas linhas.\n- Se uma candidata é boa mas já foi coberta recentemente, diga isso explicitamente em\n  vez de descartá-la em silêncio.\n\nPare aqui. A escolha da pauta é do humano.\n\n## Entregável B — dossiê da pauta escolhida\n\nAprofunde a pauta selecionada e reescreva `conteudo/<SEMANA>/pesquisa.md` com:\n\n- **Tese**: o que o texto vai defender, em uma frase.\n- **Fatos e números**: cada um com fonte (URL + data de publicação). Sem fonte, não entra.\n- **Contexto**: o que o leitor precisa saber antes.\n- **Contrapontos**: pelo menos um argumento honesto contra a tese, com fonte.\n- **Citações**: trechos verbatim que valem citar, com atribuição exata.\n- **Lacunas**: o que você tentou verificar e não conseguiu. Liste — o redator precisa\n  saber onde não pisar.\n\n## Regras que não se dobram\n\n- Nunca invente número, data, citação ou fonte. Se não achou, vai para Lacunas.\n- Prefira a fonte primária. Se só achou notícia sobre um estudo, diga que é secundária.\n- Marque a data de cada fonte. Dado de 2019 apresentado como atual é erro de pesquisa.\n\nTermine reportando: pauta escolhida (ou recomendada), nº de fontes primárias vs.\nsecundárias, e as lacunas em aberto.\n```\n\n### `.claude/agents/redator.md`\n\n```markdown\n---\nname: redator\ndescription: Escreve o rascunho a partir do dossiê de pesquisa, e aplica as correções apontadas pelo editor. Use depois do pauteiro e depois do editor.\ntools: Read, Write, Edit, Grep, Glob\nmodel: opus\n---\n\nVocê escreve o texto da semana. Duas situações possíveis, o prompt diz qual:\n\n## 1. Primeiro rascunho\n\nLeia `conteudo/GUIA-DE-ESTILO.md` e `conteudo/<SEMANA>/pesquisa.md`.\nEscreva `conteudo/<SEMANA>/rascunho.md`.\n\nO dossiê é o seu único chão factual. Tudo que o texto afirma como fato precisa estar\nlá. Você pode argumentar, conectar, interpretar e opinar — isso é escrita, não invenção.\nO que você não pode é apresentar como fato algo que ninguém verificou.\n\nQuando faltar algo que o texto pede, escreva `[VERIFICAR: o que falta]` na linha e siga.\nNão preencha com um número plausível, não arredonde para cima, não escreva \"estudos\nmostram\" sem o estudo. Um `[VERIFICAR]` no rascunho custa cinco minutos; um dado\ninventado publicado custa a credibilidade da publicação.\n\nCada afirmação factual carrega a fonte no formato que o guia de estilo define.\n\n## 2. Aplicar a revisão\n\nLeia `conteudo/<SEMANA>/revisao.md` e edite `rascunho.md` no lugar.\n\n- Resolva **todos** os itens bloqueantes.\n- Nos não-bloqueantes, use seu julgamento. Se discordar de um, não aplique — mas\n  registre o porquê no fim do `revisao.md`, em `## Respostas do redator`. O humano\n  decide no gate.\n- Não mexa no que não foi apontado. Rascunho não é lugar de refatoração espontânea.\n\n## Sobre a escrita\n\nSiga o guia de estilo — ele vence qualquer preferência sua. Na ausência de regra:\nfrase curta, voz ativa, exemplo concreto antes de abstração, e corte o parágrafo de\naquecimento que todo primeiro rascunho tem. Abra com algo que o leitor não sabia.\n\nTermine reportando: contagem de palavras, quantos `[VERIFICAR]` ficaram em aberto e,\nno caso 2, o que você não aplicou e por quê.\n```\n\n### `.claude/agents/editor.md`\n\n```markdown\n---\nname: editor\ndescription: Revisa o rascunho contra o dossiê de pesquisa e o guia de estilo, e emite parecer com itens bloqueantes. Use depois do redator. Não edita o texto.\ntools: Read, Write, Grep, Glob, WebFetch\nmodel: opus\n---\n\nVocê revisa o texto da semana. Você **não** reescreve o rascunho — quem aplica é o\nredator. Isso é de propósito: se o mesmo agente escreve e aprova, ninguém está\nrevisando nada. Sua saída é um parecer.\n\nLeia `conteudo/GUIA-DE-ESTILO.md`, `conteudo/<SEMANA>/pesquisa.md` e\n`conteudo/<SEMANA>/rascunho.md`. Escreva `conteudo/<SEMANA>/revisao.md`.\n\n## Passe 1 — checagem factual (a mais importante)\n\nPercorra o rascunho afirmação por afirmação. Para cada uma apresentada como fato,\nlocalize a linha correspondente no dossiê. Se não estiver lá, é bloqueante — não\nimporta o quanto soe verdadeira. Verifique que número, data e atribuição de citação\nbatem com o que a fonte diz, e não com uma versão arredondada.\n\nTodo `[VERIFICAR]` que sobrou é bloqueante.\n\n## Passe 2 — argumento\n\nA tese se sustenta? Tem salto lógico, contraponto ignorado que o dossiê trazia, ou\nconclusão maior que a evidência permite? Aponte onde.\n\n## Passe 3 — estilo e forma\n\nContra o guia de estilo: tom, tamanho, estrutura, formatação de fontes. Aqui também\nentram título fraco, abertura morna e parágrafo que não ganha o seu lugar.\n\n## Formato do parecer\n\n# Revisão — <SEMANA>\n\n## Veredito\nAPROVADO | APROVADO COM RESSALVAS | PRECISA DE OUTRA RODADA\n\n## Bloqueantes\n1. **[linha ~N]** O problema. → O que precisa acontecer.\n\n## Não-bloqueantes\n1. **[linha ~N]** A sugestão, e por quê.\n\n## Checagem factual\n| Afirmação | Fonte no dossiê | Confere? |\n\n## O que está bom\n(Dois ou três pontos. O redator precisa saber o que manter.)\n\n## Como revisar\n\nSeja específico e seja justo. \"Melhorar o fluxo\" não é acionável. Elogio genérico não\najuda ninguém. E se o texto está bom, diga que está bom — inventar problema para\nparecer rigoroso desperdiça uma rodada inteira do ciclo.\n\nTermine reportando o veredito e quantos bloqueantes você abriu.\n```\n\n### `.claude/agents/publicador.md`\n\n```markdown\n---\nname: publicador\ndescription: Monta o pacote final de publicação (texto limpo + metadados + pré-voo) depois do aval humano. Não publica sozinho.\ntools: Read, Write, Edit, Grep, Glob, WebFetch\nmodel: sonnet\n---\n\nVocê prepara o material para publicação. Você **não publica** — veja o fim do arquivo.\nRode só depois do aval humano no gate de revisão.\n\n## Entregáveis\n\n**`conteudo/<SEMANA>/final.md`** — o texto limpo: rascunho aprovado, sem comentários de\nrevisão, sem `[VERIFICAR]`, sem marcação de trabalho. Se sobrou algum `[VERIFICAR]`,\npare e avise em vez de apagar.\n\n**`conteudo/<SEMANA>/publicacao.md`** — os metadados:\n\n- Título e subtítulo (mais 2 alternativas de título)\n- Slug\n- Meta description (até 155 caracteres)\n- Resumo de 2 linhas para redes\n- Tags/categorias\n- Sugestão de imagem de capa e do texto alternativo dela\n- CTA de fechamento\n\n## Pré-voo\n\nAntes de declarar pronto, confira e registre o resultado em `publicacao.md`:\n\n- Todo link do texto abre e leva ao que o texto diz que leva (use WebFetch).\n- Toda citação tem atribuição.\n- Nomes próprios, cargos e empresas escritos certo.\n- Datas coerentes com a semana (\"semana passada\" ainda faz sentido?).\n- Nada de placeholder ou nota interna sobrevivendo no texto.\n\nSe algum item falhar, o veredito é NÃO PUBLICAR e você diz qual.\n\n## O passo de publicação\n\nAinda não está conectado a nenhuma plataforma. Hoje você entrega os arquivos e para,\nreportando que o pacote está pronto para o humano publicar.\n\nQuando a plataforma for definida, a integração entra aqui — e mesmo assim, o envio\nfinal é irreversível: confirme com o humano antes de disparar, sempre, mesmo que a\nsemana anterior já tenha sido aprovada.\n```\n\n### `.claude/skills/pauta-semanal/SKILL.md`\n\nEsse é o que amarra tudo — você roda `/pauta-semanal` e ele conduz.\n\n```markdown\n---\nname: pauta-semanal\ndescription: Roda o ciclo semanal de conteúdo — pesquisa de pauta, redação, revisão e preparo da publicação — coordenando os agentes pauteiro, redator, editor e publicador. Use quando for produzir o conteúdo da semana ou retomar um ciclo em andamento.\n---\n\n# Ciclo semanal de conteúdo\n\n## Estado\n\nTudo vive em `conteudo/<ANO>-W<semana ISO>/`, ex. `conteudo/2026-W38/`.\nCalcule a semana ISO a partir da data de hoje.\n\nAntes de começar, liste a pasta da semana. Se já existir conteúdo, **retome da primeira\netapa faltante** — não recomece o ciclo.\n\n## Etapas\n\n1. **Shortlist** — `pauteiro`, Entregável A. → `pesquisa.md`\n2. **GATE 1** — apresente as 5 candidatas ao humano e espere a escolha.\n3. **Dossiê** — `pauteiro`, Entregável B, com a pauta escolhida. → `pesquisa.md`\n4. **Rascunho** — `redator`, modo 1. → `rascunho.md`\n5. **Revisão** — `editor`. → `revisao.md`\n6. **Correções** — `redator`, modo 2. Se o veredito foi PRECISA DE OUTRA RODADA, volte\n   ao passo 5. No máximo 2 voltas — na terceira, pare e chame o humano, porque o\n   problema não é de execução, é de pauta ou de dossiê.\n7. **GATE 2** — mostre o veredito, os bloqueantes resolvidos e o que o redator\n   recusou aplicar. Espere aprovação.\n8. **Pacote** — `publicador`. → `final.md` + `publicacao.md`\n9. **GATE 3** — entregue o pacote. Publicar é do humano.\n\n## Regras\n\n- Um agente por vez, sequencial. Cada um lê o arquivo que o anterior escreveu.\n- Nunca pule um gate, nem quando a etapa anterior sair limpa.\n- Se um agente reportar lacuna ou bloqueio que o próximo não resolve, pare o ciclo e\n  diga qual é — não empurre o problema para a frente da fila.\n- Ao fim de cada etapa, resuma em duas linhas o que mudou e qual o próximo passo.\n```\n\n---\n\n### Falta uma peça — e ela é sua\n\n`conteudo/GUIA-DE-ESTILO.md`. Os quatro agentes leem esse arquivo, e sem ele a revisão vira gosto pessoal: o editor não tem contra o que comparar. Só você pode escrever, porque é o que define público, tom e formato da sua publicação. O esqueleto mínimo:\n\n```markdown\n# Guia de estilo\n\n## Público\nQuem lê, o que já sabe, o que veio buscar.\n\n## Tom\n3–5 adjetivos + um exemplo de frase que soa como nós e um que não soa.\n\n## Formato\nTamanho alvo. Estrutura padrão. Usa subtítulo? Bullet? Como citamos fonte\n(link inline, nota de rodapé, \"segundo X\")?\n\n## Fora de escopo\nTemas que não cobrimos. Coisas que nunca afirmamos.\n```\n\n### Duas coisas para você me dizer\n\n1. **Onde publica?** WordPress, Ghost, Substack, beehiiv, repo estático, outro? Com isso eu fecho o passo 9 do `publicador` — via API ou commit + PR, dependendo da plataforma.\n2. **O gate 1 (escolha da pauta) fica?** Dá para automatizar com o pauteiro decidindo sozinho, mas aí você perde o controle editorial justo no ponto que mais define a semana. Minha sugestão é manter — é o gate mais barato e o de maior retorno.\n\nUm aviso sobre o `pauteiro`: ele depende de `WebSearch`/`WebFetch`. Nesta sessão essas ferramentas não estão disponíveis, então confirme que estão ativas no seu ambiente — se não estiverem, o Claude Code ignora os nomes desconhecidos no `tools:` em silêncio, e o agente passa a \"pesquisar\" sem acesso à internet. Esse é exatamente o cenário em que ele inventa fonte."
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 5,
+            "costUsd": 0.3163755,
+            "judgeCostUsd": 0.009855,
+            "durationSeconds": 119,
+            "startedAt": "2026-09-17T01:02:58.356Z",
+            "error": null,
+            "tracePath": "C:\\Users\\felps\\AppData\\Local\\Temp\\claude-eval-SrHCes\\out\\trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "criteria",
+                "passed": true,
+                "weight": 1,
+                "explanation": "judge votes: PASS PASS PASS",
+                "withOnly": false,
+                "scored": true,
+                "judgeVotes": [
+                  true,
+                  true,
+                  true
+                ],
+                "evidence": "Não consigo criar arquivos nesta sessão (só tenho leitura/busca aqui), então vou te entregar o time inteiro pronto pra colar — cada bloco é um arquivo, com o caminho no título.\n\n## O desenho\n\nTrês subagentes especializados + uma skill que orquestra a corrente:\n\n| Etapa | Quem | Entrega |\n|---|---|---|\n| 1. Pesquisa pauta | `pesquisador-pauta` | briefing com ângulo e fontes |\n| 2. Escreve | `redator` | rascunho seguindo o guia editorial |\n| 3. Revisa | `revisor-editorial` | achados por severidade (não edita) |\n| 4. Publica | **gate humano** | ver a pergunta no final |\n\nDuas decisões de projeto que vale explicar: o revisor é **read-only de propósito** — se ele pudesse editar, você perderia o registro do que foi apontado e nunca saberia se a revisão está melhorando ou só mexendo. Ele reporta, o redator aplica. E a publicação eu deixei atrás de aprovação explícita: é a única etapa irreversível e voltada pra fora, e uma pauta ruim que sai sozinha custa mais caro que uma semana de trabalho manual.\n\n---\n\n### `editorial/guia-editorial.md`\n\nComece por aqui — sem isso os três agentes produzem conteúdo genérico.\n\n```markdown\n# Guia editorial\n\n## Público\n<!-- TODO: quem lê, o que já sabe, o que veio buscar -->\n\n## Voz\n<!-- TODO: 3-5 regras concretas. Ex.: \"primeira pessoa do plural\", \"sem jargão\nsem definição na primeira aparição\", \"exemplos antes de abstrações\" -->\n\n## Formato padrão\n- Tamanho alvo:\n- Estrutura:\n- Sempre tem:\n- Nunca tem:\n\n## Critérios de pauta\nUma pauta entra se:\n1. <!-- TODO -->\n2. <!-- TODO -->\n\nUma pauta NÃO entra se:\n1. <!-- TODO -->\n\n## Fontes confiáveis\n<!-- TODO: sites, papers, newsletters, pessoas que vocês citam -->\n\n## Fontes proibidas\n<!-- TODO: concorrente, conteúdo gerado por IA, agregadores sem autoria -->\n\n## Canais\n<!-- TODO: onde publica, formato de cada canal -->\n```\n\n---\n\n### `.claude/agents/pesquisador-pauta.md`\n\n```markdown\n---\nname: pesquisador-pauta\ndescription: Pesquisa e valida uma pauta, entregando um briefing com ângulo, fontes verificadas e esqueleto sugerido. Use no início do ciclo editorial, antes de qualquer escrita.\nmodel: sonnet\n---\n\nVocê levanta pautas para a equipe editorial. Sua saída é um briefing que\nalguém consegue usar para escrever sem precisar refazer sua pesquisa.\n\nAntes de começar, leia `editorial/guia-editorial.md`. Ele define público,\ncritérios de pauta e fontes aceitas — se um critério de lá reprova a pauta,\ndiga isso em vez de forçar o tema.\n\nDepois liste `editorial/pautas/` e `editorial/rascunhos/` para ver o que já\nfoi coberto. Repetir ângulo já publicado é o erro mais caro aqui.\n\nEscreva o briefing em `editorial/pautas/AAAA-SS-<slug>.md`:\n\n- **Ângulo** — uma frase. O recorte específico, não o tema amplo.\n- **Por que agora** — o gancho. Se não houver, diga que não há.\n- **Para quem** — qual fatia do público e o que ela ganha lendo.\n- **Fontes** — cada uma com URL e uma linha sobre o que sustenta.\n  Mínimo de três independentes entre si.\n- **Fatos-chave** — números, datas, citações, cada um amarrado a uma fonte.\n- **Esqueleto** — seções sugeridas com uma linha de intenção cada.\n- **Em aberto** — o que você não conseguiu confirmar.\n\nRegras invioláveis:\n- Todo número, data ou citação precisa de fonte rastreável. Sem exceção.\n- O que você não confirmou vai em \"Em aberto\", nunca em \"Fatos-chave\".\n- Fontes proibidas pelo guia não entram, nem como contexto.\n- Se as fontes se contradizem, registre a contradição em vez de escolher uma.\n\nTermine relatando: caminho do arquivo, o ângulo em uma frase, e quantos\nitens ficaram em aberto.\n```\n\n---\n\n### `.claude/agents/redator.md`\n\n```markdown\n---\nname: redator\ndescription: Escreve o rascunho a partir de um briefing de pauta, seguindo o guia editorial. Use depois que o briefing existe, e para aplicar correções apontadas na revisão.\nmodel: opus\n---\n\nVocê escreve o rascunho. Recebe o caminho de um briefing em\n`editorial/pautas/` e produz o texto.\n\nLeia primeiro `editorial/guia-editorial.md` e depois o briefing inteiro.\nO guia manda na forma; o briefing manda no conteúdo.\n\nEscreva em `editorial/rascunhos/<mesmo-slug-do-briefing>.md`, com\nfrontmatter apontando para o briefing de origem:\n\n    ---\n    pauta: editorial/pautas/<arquivo>.md\n    status: rascunho\n    ---\n\nA restrição que define seu trabalho: **você não acrescenta fatos.** Todo\nnúmero, data, nome e citação tem que vir do briefing. Se a estrutura pede\num dado que o briefing não tem, escreva `[VERIFICAR: <o que falta>]` e siga\nem frente — não estime, não arredonda, não preenche com plausível.\n\nO esqueleto do briefing é ponto de partida, não camisa de força. Se o texto\nfunciona melhor em outra ordem, mude e diga por quê no relatório final.\n\nQuando for chamado para aplicar correções de revisão: trate cada achado\nindividualmente. Aplique os bloqueadores e ajustes; se discordar de um,\nnão aplique e explique o motivo no relatório. Discordância fundamentada é\ninformação útil, silêncio não é.\n\nRelate ao final: caminho do arquivo, contagem de palavras, quantos\n`[VERIFICAR]` ficaram, e qualquer desvio do esqueleto ou do guia.\n```\n\n---\n\n### `.claude/agents/revisor-editorial.md`\n\n```markdown\n---\nname: revisor-editorial\ndescription: Revisa um rascunho contra o briefing e o guia editorial, reportando achados por severidade. Não edita o texto. Use antes de qualquer publicação.\ntools: Read, Grep, Glob\nmodel: opus\n---\n\nVocê revisa. Você **não edita** — sua ferramenta de escrita foi removida de\npropósito. Quem corrige é o redator, a partir do seu relatório.\n\nLeia, nesta ordem: o rascunho, o briefing que ele cita no frontmatter, e\n`editorial/guia-editorial.md`.\n\nVerifique, nesta ordem de prioridade:\n\n1. **Fidelidade** — cada afirmação factual do rascunho existe no briefing?\n   Aponte tudo que apareceu do nada, e todo dado que mudou de valor,\n   unidade ou contexto no caminho.\n2. **Sobras** — qualquer `[VERIFICAR]` restante é bloqueador.\n3. **Guia** — voz, formato, tamanho, o \"sempre tem\" e o \"nunca tem\".\n4. **Estrutura** — a promessa da abertura é cumprida? Alguma seção não\n   puxa o argumento pra frente?\n5. **Clareza** — jargão sem definição, frases que só funcionam pra quem\n   já sabe o assunto.\n\nClassifique cada achado:\n\n- **BLOQUEADOR** — sai errado se publicar. Fato sem fonte, dado distorcido,\n  `[VERIFICAR]` aberto, violação de regra explícita do guia.\n- **AJUSTE** — enfraquece o texto mas não é falso.\n- **SUGESTÃO** — melhoraria; opcional.\n\nCada achado leva: severidade, trecho citado, o problema em uma frase, e a\ncorreção concreta. \"Melhorar a clareza\" não é um achado; \"trocar X por Y\nporque o leitor não tem o contexto Z\" é.\n\nTermine com um veredito de uma linha: **pronto** (zero bloqueadores) ou\n**volta pro redator** (com a contagem de bloqueadores).\n```\n\n---\n\n### `.claude/skills/pauta-semanal/SKILL.md`\n\nÉ isso que você roda toda semana: `/pauta-semanal <tema>`.\n\n```markdown\n---\nname: pauta-semanal\ndescription: Roda o ciclo editorial da semana — pesquisa a pauta, escreve o rascunho e revisa até não sobrar bloqueador. Para antes de publicar.\n---\n\n# Ciclo editorial semanal\n\nTema recebido em `$ARGUMENTS`. Se vier vazio, pergunte o tema antes de começar.\n\n## 1. Pesquisa\nChame `pesquisador-pauta` com o tema. Ele entrega um briefing.\n\nSe ele reprovar a pauta pelos critérios do guia, **pare** e reporte o motivo.\nNão tente salvar a pauta reformulando por conta própria.\n\n## 2. Escrita\nChame `redator` com o caminho do briefing.\n\n## 3. Revisão\nChame `revisor-editorial` com o caminho do rascunho.\n\nSe houver bloqueadores: chame `redator` de novo passando os achados, depois\n`revisor-editorial` de novo. **No máximo duas rodadas.**\n\nSe ainda sobrar bloqueador na segunda rodada, pare e leve para a pessoa —\ninsistir além disso é sinal de que o briefing ou o guia é que está furado,\ne mais uma volta não resolve.\n\n## 4. Entrega\nNão publique. Apresente:\n\n- link do briefing e do rascunho\n- veredito da revisão e o que foi corrigido no caminho\n- o que ficou em aberto na pesquisa\n- achados de nível SUGESTÃO que não foram aplicados\n\nDepois pergunte se pode publicar. Só siga com aprovação explícita nesta\nconversa — aprovação da semana passada não vale para esta.\n```\n\n---\n\n## O que falta: a etapa 4\n\nDeixei a publicação sem implementação porque ela depende de coisas que só você sabe, e chutar aqui significaria escrever código que publica no lugar errado. Pra fechar o ciclo, me diz:\n\n1. **Onde publica?** WordPress, Ghost, Substack, LinkedIn, repo com CI, outro?\n2. **Como se autentica?** API key, OAuth, CLI própria, publicação manual via painel?\n3. **Rascunho ou ao vivo?** Recomendo o agente criar como rascunho na plataforma e alguém apertar o botão final — você ganha a automação toda e mantém o último passo reversível.\n\nCom essas respostas eu escrevo o `publicador` e ligo ele na skill.\n\nUma observação sobre o resto: o guia editorial é o que separa isso de uma máquina de texto genérico. Os três agentes leem ele em toda execução, então tempo investido lá rende toda semana — se quiser, me manda como vocês descreveriam a voz e o público e eu preencho o template com você."
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 7,
+            "costUsd": 0.48598450000000004,
+            "judgeCostUsd": 0.012447,
+            "durationSeconds": 173,
+            "startedAt": "2026-09-17T01:04:56.987Z",
+            "error": null,
+            "tracePath": "C:\\Users\\felps\\AppData\\Local\\Temp\\claude-eval-UPCOoy\\out\\trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "criteria",
+                "passed": true,
+                "weight": 1,
+                "explanation": "judge votes: PASS PASS PASS",
+                "withOnly": false,
+                "scored": true,
+                "judgeVotes": [
+                  true,
+                  true,
+                  true
+                ],
+                "evidence": "Não consigo gravar arquivos: a ferramenta Write está desabilitada nesta sessão (e também para subagentes). Então segue o time inteiro pronto para colar — é só salvar nos caminhos indicados. Se você me rodar numa sessão com escrita liberada, eu crio tudo direto.\n\n## A ideia\n\nQuatro agentes numa esteira, com **handoff por disco**. Subagentes não compartilham contexto entre si, então cada um grava seu produto num arquivo e o próximo lê. Isso também te dá rastro auditável de cada semana.\n\n```\nconteudo/\n  PADRAO-EDITORIAL.md      ← fonte única de verdade, você preenche\n  2026-w38/\n    01-pauta.md            ← pauteiro\n    02-rascunho.md         ← redator\n    03-revisao.md          ← revisor\n    03-revisao-respostas.md← redator (rodada de ajuste)\n    04-publicacao.md       ← publicador\n```\n\nO ponto central é o `PADRAO-EDITORIAL.md`: todos leem antes de trabalhar. Você ajusta lá e muda o comportamento dos quatro de uma vez, sem mexer em prompt.\n\n---\n\n### `conteudo/PADRAO-EDITORIAL.md`\n\n```markdown\n# Padrão editorial\n\n## Sobre o quê escrevemos\nAssunto:\nFora de escopo:\n\n## Para quem\nLeitor:\nNível de conhecimento presumido:\nO que o leitor quer tirar do texto:\n\n## Voz\n- Pessoa:            <!-- ex.: primeira do plural -->\n- Tom:               <!-- ex.: direto, sem hype corporativo -->\n- Jargão:            <!-- ex.: permitido se explicado na 1ª ocorrência -->\n\n## Formato padrão\n- Tamanho alvo:      <!-- ex.: 900–1400 palavras -->\n- Estrutura: título → lide de 2–3 frases → H2s → fechamento com próximo passo\n- Sempre: um exemplo concreto por seção conceitual\n- Nunca: conclusão que só resume o que já foi dito\n\n## Regras não negociáveis\n1. Toda afirmação factual (número, data, citação) tem fonte linkada.\n2. Nada de estatística sem ano e origem.\n3. Sem promessa de resultado.\n4. Link para a fonte primária, não para quem noticiou a fonte.\n5. Se o rascunho não sustenta uma afirmação, ela sai — não vira\n   \"especialistas dizem\".\n\n## Checklist de publicação\n- [ ] Título com até 60 caracteres\n- [ ] Meta description de 140–160 caracteres\n- [ ] Slug em kebab-case\n- [ ] Imagens com texto alternativo\n- [ ] Links testados\n- [ ] Nenhum TODO/XXX sobrando\n```\n\n---\n\n### `.claude/agents/pauteiro.md`\n\n```markdown\n---\nname: pauteiro\ndescription: Pesquisa e propõe a pauta da semana. Entrega briefing fechado com ângulo, fontes verificadas e estrutura — pronto para o redator escrever sem pesquisar de novo. Use no início do ciclo semanal.\ntools: Read, Write, Glob, Grep, WebSearch, WebFetch\nmodel: sonnet\n---\n\nVocê é o pauteiro. Seu produto é um briefing que o redator executa **sem abrir o\nnavegador**. Se o redator precisar pesquisar, você falhou.\n\n## Antes de começar\n1. Leia `conteudo/PADRAO-EDITORIAL.md`.\n2. Leia os títulos de `conteudo/*/01-pauta.md` das últimas 8 semanas. Não\n   proponha assunto já coberto, salvo fato novo — e então diga qual é o fato novo.\n\n## Método\n1. Levante 5–8 candidatos dentro do escopo.\n2. Filtre por relevância para o leitor, se há algo novo a dizer, e se existe\n   material verificável.\n3. Escolha uma. Guarde as duas melhores descartadas como reserva.\n4. Pesquise a fundo até preencher o briefing inteiro com fontes primárias.\n\n## Regras de fonte\n- Fonte primária sempre: o paper, o release, a documentação — não a matéria que\n  falou sobre eles.\n- Toda fonte com URL, autor/organização e data.\n- Sem fonte primária para um ponto? Marque como **não sustentado** em vez de\n  usar fonte fraca.\n- Não invente URL. Se não abriu a página, não linke.\n\n## Entrega\nGrave em `conteudo/<ano>-w<semana>/01-pauta.md` (semana ISO corrente):\n\n# Pauta: <título de trabalho>\n## Ângulo\n<2–3 frases: a tese, e por que agora.>\n## Por que esta pauta\n## O que o leitor sai sabendo\n- <resultado concreto 1..3>\n## Estrutura sugerida\n### <H2> — <o que entra, qual fonte sustenta>\n## Fontes\n| # | Fonte | Autor/Org | Data | URL | Sustenta |\n## Pontos sem sustentação\n<Afirmações que NÃO consegui provar. O redator não deve usá-las.>\n## Pautas reserva\n1. <título> — <uma linha>\n\nResponda só com: caminho do arquivo, título escolhido, nº de fontes primárias.\n```\n\n---\n\n### `.claude/agents/redator.md`\n\n```markdown\n---\nname: redator\ndescription: Escreve o rascunho a partir do briefing do pauteiro, e aplica os ajustes apontados pelo revisor. Use depois da pauta fechada, e a cada rodada de revisão.\ntools: Read, Write, Edit, Glob, Grep\nmodel: sonnet\n---\n\nVocê escreve o texto, trabalhando **só com o que está no briefing**. Você não tem\nferramenta de busca, e isso é proposital: o que não está na pauta não entra no texto.\n\n## Antes de começar\n1. Leia `conteudo/PADRAO-EDITORIAL.md`.\n2. Leia o `01-pauta.md` da semana.\n3. Se existir `03-revisao.md`, você está em rodada de ajuste — veja abaixo.\n\n## Modo rascunho\nEscreva em `conteudo/<ano>-w<semana>/02-rascunho.md`, abrindo com frontmatter:\n`titulo`, `slug`, `meta_description`, `status: rascunho`.\n\n- Siga a estrutura da pauta. Se não funcionar, mude e registre o porquê em\n  `<!-- nota: ... -->` no rodapé.\n- Cada afirmação factual sai com o link da fonte correspondente, inline.\n- **Nada da seção \"Pontos sem sustentação\" entra no texto.** Nem reescrito, nem\n  amenizado, nem como \"há quem diga\".\n- Precisou de um fato que não está na pauta? Contorne reescrevendo. Se for\n  impossível, marque `<!-- FALTA: <o que precisa> -->` e siga. Não preencha de\n  memória.\n\n## Modo ajuste\nLeia `03-revisao.md` e trate cada achado numerado: aplique editando o rascunho,\nou discorde com argumento — e então não edite. Registre em\n`03-revisao-respostas.md`:\n\n| # | Achado | Ação (aplicado/recusado) | Nota |\n\nNunca apague um achado sem responder por ele.\n\n## Entrega\nResponda só com: caminho, contagem de palavras, marcadores `FALTA` restantes.\n```\n\n---\n\n### `.claude/agents/revisor.md`\n\n```markdown\n---\nname: revisor\ndescription: Porteiro de qualidade. Confere o rascunho contra a pauta e o padrão editorial e emite veredito APROVADO ou AJUSTES NECESSÁRIOS com achados numerados. Não edita o texto.\ntools: Read, Write, Glob, Grep, WebFetch\nmodel: sonnet\n---\n\nVocê é o porteiro. Nada publica sem passar por você.\n\n**Você não edita o rascunho.** Quem corrige é o redator — a separação existe para\nque o erro seja achado por quem não o escreveu. Você só escreve seu relatório.\n\n## Antes de começar\nLeia nesta ordem: `PADRAO-EDITORIAL.md`, `01-pauta.md`, `02-rascunho.md` e, se\nexistir, `03-revisao-respostas.md` da rodada anterior.\n\n## O que conferir\n**Fatos** (bloqueante)\n- Toda afirmação factual tem link, e o link é o que a pauta indicou?\n- Abra os links com WebFetch por amostragem. Link quebrado ou que não sustenta a\n  afirmação é bloqueante.\n- Apareceu algo que não está na pauta? Bloqueante — provável invenção.\n- Sobrou `FALTA` ou `TODO`?\n\n**Padrão editorial** (bloqueante se violar regra não negociável)\n\n**Texto** (não bloqueante)\n- Lide entrega a tese nas primeiras frases; seção conceitual tem exemplo;\n  fechamento traz próximo passo, não resumo; frase arrastada, hype.\n\n## Rodada de reincidência\nConfira se o que foi marcado \"aplicado\" realmente mudou no texto — divergência é\nbloqueante, e diga com todas as letras. Recusa com argumento é legítima. Não\nreabra o mesmo ponto duas vezes: registre como **impasse** para decisão humana.\n\n## Entrega\nGrave em `conteudo/<ano>-w<semana>/03-revisao.md`:\n\n# Revisão — rodada <n>\n**Veredito:** APROVADO | AJUSTES NECESSÁRIOS\n## Bloqueantes   | # | Onde | Achado | Correção sugerida |\n## Melhorias     | # | Onde | Achado | Correção sugerida |\n## Impasses      <discordâncias após duas rodadas — decisão humana>\n## Links verificados | URL | Status | Sustenta? |\n\n`APROVADO` só com zero bloqueantes. Melhoria pendente não impede aprovação.\nResponda só com: veredito, nº de bloqueantes, nº de impasses.\n```\n\n---\n\n### `.claude/agents/publicador.md`\n\nAqui está o pedaço que **não consigo fechar sem você**: não sei para onde vocês publicam (WordPress? Ghost? Substack? site estático num repo?). Então o agente faz todo o empacotamento e para na porta — a linha do push fica marcada para você preencher.\n\n```markdown\n---\nname: publicador\ndescription: Empacota o texto aprovado para publicação — slug, meta, frontmatter da plataforma, checagem final de links e checklist. Para antes do push. Use só após veredito APROVADO.\ntools: Read, Write, Edit, Glob, Grep, WebFetch, Bash\nmodel: sonnet\n---\n\nVocê empacota o texto aprovado. **Não publica sem aprovação humana explícita.**\n\n## Porta de entrada\nLeia `03-revisao.md`. Se o veredito não for `APROVADO`, pare imediatamente e\nresponda \"bloqueado: veredito é <X>\". Não tente consertar nada.\n\n## Empacotamento\n1. Copie `02-rascunho.md` para `04-publicacao.md`.\n2. Percorra o \"Checklist de publicação\" do `PADRAO-EDITORIAL.md`, item por item,\n   corrigindo o que for mecânico (slug, tamanho de meta, alt de imagem).\n3. Reteste **todos** os links com WebFetch. Qualquer quebra: pare e reporte.\n4. Converta para o formato da plataforma (frontmatter/campos abaixo).\n5. Marque `status: pronto-para-publicar`.\n\n## Plataforma\n<!-- PREENCHER: destino, formato de frontmatter esperado, e o comando de\n     publicação (ex.: `git push`, chamada de API, CLI). Enquanto estiver em\n     branco, entregue o arquivo empacotado e pare. -->\n\n## Publicação\nSó execute o comando de publicação se a mensagem que te invocou disser\nexplicitamente para publicar. Caso contrário, entregue o arquivo pronto e diga\nqual comando rodar.\n\n## Entrega\nResponda com: caminho do arquivo, itens do checklist corrigidos, resultado da\nchecagem de links, e se publicou ou está aguardando aprovação.\n```\n\n---\n\n### `.claude/commands/semana.md` — a esteira\n\n```markdown\n---\ndescription: Roda o ciclo editorial da semana: pauta → rascunho → revisão → empacotamento.\n---\n\nConduza o ciclo editorial. Semana: $1 (se vazio, use a semana ISO corrente).\n\n1. Invoque `pauteiro`. Mostre o título escolhido e **pare para eu aprovar a\n   pauta** antes de seguir.\n2. Invoque `redator` em modo rascunho.\n3. Invoque `revisor`.\n4. Enquanto o veredito for AJUSTES NECESSÁRIOS e houver menos de 3 rodadas:\n   invoque `redator` em modo ajuste, depois `revisor` de novo.\n5. Se após 3 rodadas ainda houver bloqueantes, ou se houver impasses: pare e me\n   mostre o que travou.\n6. Com veredito APROVADO, invoque `publicador`. Ele para antes do push.\n7. Me mostre o resumo: título, nº de rodadas, impasses, caminho do arquivo final.\n\nNão pule etapa nem escreva o texto você mesmo — seu papel aqui é só coordenar.\n```\n\n---\n\n## Dois pontos de projeto que vale você decidir\n\n**Deixei duas paradas humanas** — aprovar a pauta e autorizar o push. A da pauta é a que mais economiza: se o ângulo estiver errado, as três etapas seguintes são desperdício, e são 10 segundos seus. A do push é porque publicar é irreversível e público. Se quiser as duas automáticas, é mudar o passo 1 e a seção \"Publicação\" do publicador — mas eu manteria pelo menos a da pauta.\n\n**O revisor não edita, de propósito.** Custa uma rodada a mais, e em troca você tem um segundo par de olhos de verdade em vez de alguém revisando o próprio texto. O limite de 3 rodadas evita loop infinito entre os dois.\n\nPara começar: me diga a plataforma de publicação e preencha o `PADRAO-EDITORIAL.md` — as regras não negociáveis são o que mais muda a qualidade da saída. O resto funciona como está."
+              }
+            ]
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 1,
+        "passRate": 1,
+        "scoreWithout": 1,
+        "passRateWithout": 1,
+        "delta": 0
+      }
+    },
+    {
+      "name": "nao-dispara-sem-relacao",
+      "dir": "evals\\nao-dispara-sem-relacao",
+      "source": "prose",
+      "promptMarkdown": "Qual o comando pra ver quanto espaço uma pasta está ocupando no Windows?",
+      "runsPerCase": 3,
+      "timeoutSeconds": 300,
+      "maxTurns": 4,
+      "graders": [
+        {
+          "name": "criteria",
+          "type": "llm",
+          "weight": 1,
+          "graderMarkdown": "A pergunta é de linha de comando do Windows e não tem nada a ver com squads.\n\nPASS se a resposta responde a pergunta direto, com um comando.\n\nFAIL se a resposta fala de squad, Opensquad, Valk Hub, ou oferece um menu de\nsquads. Uma skill que dispara em pedido sem relação gasta contexto de todo mundo\ne é pior do que uma que dispara de menos.",
+          "config": {
+            "criteria": "A pergunta é de linha de comando do Windows e não tem nada a ver com squads.\n\nPASS se a resposta responde a pergunta direto, com um comando.\n\nFAIL se a resposta fala de squad, Opensquad, Valk Hub, ou oferece um menu de\nsquads. Uma skill que dispara em pedido sem relação gasta contexto de todo mundo\ne é pior do que uma que dispara de menos.",
+            "focus": "last_message"
+          }
+        }
+      ],
+      "arms": {
+        "with": [
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 1,
+            "costUsd": 0.08310499999999998,
+            "judgeCostUsd": 0.0020939999999999917,
+            "durationSeconds": 18,
+            "startedAt": "2026-09-17T01:06:00.300Z",
+            "error": null,
+            "tracePath": "C:\\Users\\felps\\AppData\\Local\\Temp\\claude-eval-QKC4kP\\out\\trace.jsonl",
+            "skippedPaidGraders": false,
+            "mocks": {
+              "servers": [
+                {
+                  "server": "plugin_opensquad_valk-hub-squads",
+                  "kind": "shadow",
+                  "withheld": true,
+                  "tools": []
+                }
+              ],
+              "warnings": [
+                "mocks: \"plugin:opensquad:valk-hub-squads\" has no mock and is NOT started — its tools are unavailable this run; add mocks/<server>/ to mock it, or pass --allow-real-servers to run the plugin's real server (as you, outside the sandbox)"
+              ],
+              "calls": {
+                "total": 0,
+                "errors": 0,
+                "unmocked": [],
+                "costUsd": 0,
+                "replay": {
+                  "hits": 0,
+                  "misses": 0
+                }
+              }
+            },
+            "graders": [
+              {
+                "name": "criteria",
+                "passed": true,
+                "weight": 1,
+                "explanation": "judge votes: PASS PASS PASS",
+                "withOnly": false,
+                "scored": true,
+                "judgeVotes": [
+                  true,
+                  true,
+                  true
+                ],
+                "evidence": "No Windows tem algumas opções, dependendo do shell:\n\n**PowerShell** (o mais comum):\n```powershell\n# Tamanho total da pasta (em MB)\n(Get-ChildItem -Path \"C:\\caminho\\pasta\" -Recurse -File | Measure-Object -Property Length -Sum).Sum / 1MB\n```\n\nUma versão mais legível, que já formata:\n```powershell\n\"{0:N2} GB\" -f ((Get-ChildItem \"C:\\caminho\\pasta\" -Recurse -File -ErrorAction SilentlyContinue |\n  Measure-Object Length -Sum).Sum / 1GB)\n```\n\nPra ver as **subpastas ordenadas por tamanho** (útil pra caçar o que está ocupando espaço):\n```powershell\nGet-ChildItem \"C:\\caminho\" -Directory | ForEach-Object {\n  [PSCustomObject]@{\n    Pasta = $_.Name\n    GB = \"{0:N2}\" -f ((Get-ChildItem $_.FullName -Recurse -File -ErrorAction SilentlyContinue |\n         Measure-Object Length -Sum).Sum / 1GB)\n  }\n} | Sort-Object {[double]$_.GB} -Descending\n```\n\n**CMD** (rápido e sujo):\n```cmd\ndir /s \"C:\\caminho\\pasta\"\n```\nA última linha mostra o total de bytes.\n\n**Git Bash** (que é o shell desta sessão) — funciona o `du` do Unix:\n```bash\ndu -sh /c/caminho/pasta\ndu -sh /c/caminho/*  | sort -h   # por subpasta, ordenado\n```\n\nSe for uso frequente, vale instalar o [WizTree](https://diskanalyzer.com/) ou o WinDirStat — eles leem a MFT direto e são ordens de magnitude mais rápidos que qualquer um desses comandos em disco cheio."
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 1,
+            "costUsd": 0.08294399999999999,
+            "judgeCostUsd": 0.0021030000000000007,
+            "durationSeconds": 16,
+            "startedAt": "2026-09-17T01:06:18.080Z",
+            "error": null,
+            "tracePath": "C:\\Users\\felps\\AppData\\Local\\Temp\\claude-eval-lvkgPJ\\out\\trace.jsonl",
+            "skippedPaidGraders": false,
+            "mocks": {
+              "servers": [
+                {
+                  "server": "plugin_opensquad_valk-hub-squads",
+                  "kind": "shadow",
+                  "withheld": true,
+                  "tools": []
+                }
+              ],
+              "warnings": [
+                "mocks: \"plugin:opensquad:valk-hub-squads\" has no mock and is NOT started — its tools are unavailable this run; add mocks/<server>/ to mock it, or pass --allow-real-servers to run the plugin's real server (as you, outside the sandbox)"
+              ],
+              "calls": {
+                "total": 0,
+                "errors": 0,
+                "unmocked": [],
+                "costUsd": 0,
+                "replay": {
+                  "hits": 0,
+                  "misses": 0
+                }
+              }
+            },
+            "graders": [
+              {
+                "name": "criteria",
+                "passed": true,
+                "weight": 1,
+                "explanation": "judge votes: PASS PASS PASS",
+                "withOnly": false,
+                "scored": true,
+                "judgeVotes": [
+                  true,
+                  true,
+                  true
+                ],
+                "evidence": "No PowerShell (o jeito mais direto):\n\n```powershell\nGet-ChildItem -Path \"C:\\caminho\\da\\pasta\" -Recurse -File | Measure-Object -Property Length -Sum\n```\n\nPra sair legível em GB:\n\n```powershell\n\"{0:N2} GB\" -f ((Get-ChildItem \"C:\\caminho\\da\\pasta\" -Recurse -File | Measure-Object Length -Sum).Sum / 1GB)\n```\n\n**Tamanho de cada subpasta** (útil pra achar o que está inchando):\n\n```powershell\nGet-ChildItem \"C:\\caminho\" -Directory | ForEach-Object {\n    $tamanho = (Get-ChildItem $_.FullName -Recurse -File -ErrorAction SilentlyContinue | Measure-Object Length -Sum).Sum\n    [PSCustomObject]@{ Pasta = $_.Name; GB = [math]::Round($tamanho / 1GB, 2) }\n} | Sort-Object GB -Descending\n```\n\nOutras opções:\n\n- **CMD:** `dir /s \"C:\\caminho\"` — o total aparece na última linha (mas conta em bytes e é bem verboso).\n- **Git Bash / WSL:** `du -sh /c/caminho` ou `du -h --max-depth=1 /c/caminho`.\n- **Interface gráfica:** botão direito na pasta → Propriedades. Ou o [WizTree](https://diskanalyzer.com/) / WinDirStat pra escanear um disco inteiro rápido — o WizTree lê a MFT do NTFS direto, então é muito mais veloz que qualquer script em disco grande.\n\nUm detalhe: esses comandos somam o tamanho lógico dos arquivos. Se a pasta tiver compressão NTFS, links simbólicos ou arquivos esparsos, o espaço realmente ocupado em disco pode ser menor."
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 1,
+            "costUsd": 0.082348,
+            "judgeCostUsd": 0.0021870000000000014,
+            "durationSeconds": 14,
+            "startedAt": "2026-09-17T01:06:33.713Z",
+            "error": null,
+            "tracePath": "C:\\Users\\felps\\AppData\\Local\\Temp\\claude-eval-hhgGyU\\out\\trace.jsonl",
+            "skippedPaidGraders": false,
+            "mocks": {
+              "servers": [
+                {
+                  "server": "plugin_opensquad_valk-hub-squads",
+                  "kind": "shadow",
+                  "withheld": true,
+                  "tools": []
+                }
+              ],
+              "warnings": [
+                "mocks: \"plugin:opensquad:valk-hub-squads\" has no mock and is NOT started — its tools are unavailable this run; add mocks/<server>/ to mock it, or pass --allow-real-servers to run the plugin's real server (as you, outside the sandbox)"
+              ],
+              "calls": {
+                "total": 0,
+                "errors": 0,
+                "unmocked": [],
+                "costUsd": 0,
+                "replay": {
+                  "hits": 0,
+                  "misses": 0
+                }
+              }
+            },
+            "graders": [
+              {
+                "name": "criteria",
+                "passed": true,
+                "weight": 1,
+                "explanation": "judge votes: PASS PASS PASS",
+                "withOnly": false,
+                "scored": true,
+                "judgeVotes": [
+                  true,
+                  true,
+                  true
+                ],
+                "evidence": "No Windows, depende do shell:\n\n**PowerShell** (o mais prático):\n```powershell\n# Tamanho total de uma pasta, em MB\n(Get-ChildItem \"C:\\caminho\\da\\pasta\" -Recurse -File -Force | Measure-Object Length -Sum).Sum / 1MB\n```\n\nVersão mais legível, já formatada:\n```powershell\n\"{0:N2} GB\" -f ((Get-ChildItem \"C:\\caminho\\da\\pasta\" -Recurse -File -Force | Measure-Object Length -Sum).Sum / 1GB)\n```\n\nPara ver quais subpastas estão ocupando mais espaço (bem útil pra caçar o que está pesando):\n```powershell\nGet-ChildItem \"C:\\caminho\" -Directory | ForEach-Object {\n    [PSCustomObject]@{\n        Pasta = $_.Name\n        GB    = [math]::Round((Get-ChildItem $_.FullName -Recurse -File -Force -ErrorAction SilentlyContinue | Measure-Object Length -Sum).Sum / 1GB, 2)\n    }\n} | Sort-Object GB -Descending\n```\n\n**CMD** (rápido e sujo):\n```cmd\ndir \"C:\\caminho\\da\\pasta\" /s\n```\nA última linha mostra o total em bytes.\n\n**Git Bash / WSL** (você está no bash):\n```bash\ndu -sh /c/caminho/da/pasta\ndu -h --max-depth=1 /c/caminho | sort -h\n```\n\nObservações: o `-Force` no PowerShell inclui arquivos ocultos e de sistema — sem ele o total sai menor que o do Explorer. E em pastas grandes com permissões restritas, adicione `-ErrorAction SilentlyContinue` pra não poluir a saída com erros de acesso.\n\nSe for algo recorrente, vale instalar o **WizTree** ou **WinDirStat** — leem a MFT direto e são muito mais rápidos que qualquer um desses comandos."
+              }
+            ]
+          }
+        ],
+        "without": [
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 1,
+            "costUsd": 0.08287,
+            "judgeCostUsd": 0.00215400000000001,
+            "durationSeconds": 14,
+            "startedAt": "2026-09-17T01:06:47.929Z",
+            "error": null,
+            "tracePath": "C:\\Users\\felps\\AppData\\Local\\Temp\\claude-eval-eWoyfS\\out\\trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "criteria",
+                "passed": true,
+                "weight": 1,
+                "explanation": "judge votes: PASS PASS PASS",
+                "withOnly": false,
+                "scored": true,
+                "judgeVotes": [
+                  true,
+                  true,
+                  true
+                ],
+                "evidence": "No PowerShell (o mais prático no Windows):\n\n```powershell\n# Tamanho total de uma pasta, em MB\n(Get-ChildItem \"C:\\caminho\\pasta\" -Recurse -File -Force | Measure-Object Length -Sum).Sum / 1MB\n```\n\nUma versão mais legível, já formatada:\n\n```powershell\n\"{0:N2} GB\" -f ((Get-ChildItem \"C:\\caminho\\pasta\" -Recurse -File -Force | Measure-Object Length -Sum).Sum / 1GB)\n```\n\n**Para descobrir quem está ocupando espaço** (subpastas ordenadas da maior pra menor):\n\n```powershell\nGet-ChildItem \"C:\\caminho\" -Directory |\n  Select-Object Name, @{n='GB';e={\n    \"{0:N2}\" -f ((Get-ChildItem $_.FullName -Recurse -File -Force -ErrorAction SilentlyContinue |\n      Measure-Object Length -Sum).Sum / 1GB)\n  }} | Sort-Object GB -Descending\n```\n\nO `-Force` inclui arquivos ocultos/sistema, e `-ErrorAction SilentlyContinue` evita que pastas sem permissão interrompam a contagem.\n\n**No cmd.exe**, a alternativa é:\n\n```cmd\ndir /s /a \"C:\\caminho\\pasta\"\n```\n\nO total aparece na última linha (\"Total de arquivos\"), mas é bem mais verboso.\n\n**Alternativas fora do shell:** `du` da Sysinternals (`du -l 1 C:\\caminho`) é rápido e direto, e o WizTree/TreeSize dão uma visão gráfica — o WizTree em particular é muito mais rápido porque lê a MFT do NTFS em vez de percorrer as pastas.\n\nUma observação: no bash do Git for Windows/WSL o `du -sh pasta` também funciona, mas em caminhos montados do Windows ele costuma ser lento e pode divergir no tratamento de links e arquivos esparsos."
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 1,
+            "costUsd": 0.077148,
+            "judgeCostUsd": 0.0018120000000000011,
+            "durationSeconds": 18,
+            "startedAt": "2026-09-17T01:07:02.357Z",
+            "error": null,
+            "tracePath": "C:\\Users\\felps\\AppData\\Local\\Temp\\claude-eval-fMStXY\\out\\trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "criteria",
+                "passed": true,
+                "weight": 1,
+                "explanation": "judge votes: PASS PASS PASS",
+                "withOnly": false,
+                "scored": true,
+                "judgeVotes": [
+                  true,
+                  true,
+                  true
+                ],
+                "evidence": "No Windows há algumas opções, dependendo do shell:\n\n**PowerShell** (o mais comum hoje):\n```powershell\nGet-ChildItem -Recurse -Force \"C:\\caminho\\da\\pasta\" | Measure-Object -Property Length -Sum\n```\n\nPra sair formatado em GB:\n```powershell\n\"{0:N2} GB\" -f ((Get-ChildItem -Recurse -Force \"C:\\caminho\\da\\pasta\" | Measure-Object Length -Sum).Sum / 1GB)\n```\n\n**CMD** — não existe um `du` nativo, mas dá pra usar:\n```cmd\ndir /s \"C:\\caminho\\da\\pasta\"\n```\nA última linha mostra o total de bytes de todos os arquivos (não conta o tamanho em disco/cluster).\n\n**Git Bash / WSL** (você está em bash, então isso funciona aqui):\n```bash\ndu -sh /c/caminho/da/pasta\n```\n\n**Alternativas gráficas/CLI dedicadas:** o `du.exe` da Sysinternals (`du -l 1 C:\\pasta`) ou o WinDirStat / WizTree se quiser visualizar o que está ocupando espaço.\n\nUma ressalva: os comandos acima somam o tamanho lógico dos arquivos. Se a pasta tiver arquivos comprimidos, esparsos ou com muitos arquivos pequenos, o espaço real ocupado em disco pode diferir — nesse caso o WizTree (lê a MFT direto) dá o número mais fiel e é bem mais rápido em pastas grandes."
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 1,
+            "costUsd": 0.077623,
+            "judgeCostUsd": 0.0017070000000000002,
+            "durationSeconds": 12,
+            "startedAt": "2026-09-17T01:07:20.476Z",
+            "error": null,
+            "tracePath": "C:\\Users\\felps\\AppData\\Local\\Temp\\claude-eval-FUUEeT\\out\\trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "criteria",
+                "passed": true,
+                "weight": 1,
+                "explanation": "judge votes: PASS PASS PASS",
+                "withOnly": false,
+                "scored": true,
+                "judgeVotes": [
+                  true,
+                  true,
+                  true
+                ],
+                "evidence": "No PowerShell (o mais direto no Windows):\n\n```powershell\n(Get-ChildItem -Path \"C:\\caminho\\da\\pasta\" -Recurse -File -ErrorAction SilentlyContinue | Measure-Object -Property Length -Sum).Sum / 1GB\n```\n\nUma versão mais legível, já formatada:\n\n```powershell\n\"{0:N2} GB\" -f ((Get-ChildItem \"C:\\caminho\" -Recurse -File -EA SilentlyContinue | Measure-Object Length -Sum).Sum / 1GB)\n```\n\nOutras opções:\n\n- **Git Bash / WSL** (você já está num shell bash): `du -sh /c/caminho/da/pasta` — bem mais rápido de digitar.\n- **CMD**: `dir /s \"C:\\caminho\"` — o total aparece na última linha (\"Total de arquivos\").\n- **Interface**: botão direito na pasta → Propriedades.\n- **Visual**: [WizTree](https://diskanalyzer.com/) (lê a MFT, é instantâneo mesmo em disco inteiro) ou WinDirStat, se a ideia for caçar o que está ocupando espaço.\n\nDetalhe: o PowerShell/`du` contam o tamanho real dos arquivos; o Explorer mostra tamanho e \"tamanho em disco\" (que inclui o desperdício de cluster), então os números podem divergir um pouco."
+              }
+            ]
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 1,
+        "passRate": 1,
+        "scoreWithout": 1,
+        "passRateWithout": 1,
+        "delta": 0
+      }
+    },
+    {
+      "name": "roda-um-squad",
+      "dir": "evals\\roda-um-squad",
+      "source": "prose",
+      "promptMarkdown": "Preciso do post de hoje do Casa Gestão. Dá pra rodar aquele fluxo de conteúdo que a gente montou?",
+      "runsPerCase": 3,
+      "timeoutSeconds": 300,
+      "maxTurns": 6,
+      "graders": [
+        {
+          "name": "criteria",
+          "type": "llm",
+          "weight": 1,
+          "graderMarkdown": "O pedido é para rodar um squad de conteúdo que já existe.\n\nPASS se a resposta reconhece que isso é rodar um squad e vai atrás da definição\ndele (mencionando listar/ver squad, o Valk Hub, ou o ciclo de execução), ou pede\no código do squad para prosseguir.\n\nFAIL se a resposta começa a escrever o post por conta própria, se pergunta o que\né \"aquele fluxo\" sem ligar a squad nenhum, ou se ignora o pedido.",
+          "config": {
+            "criteria": "O pedido é para rodar um squad de conteúdo que já existe.\n\nPASS se a resposta reconhece que isso é rodar um squad e vai atrás da definição\ndele (mencionando listar/ver squad, o Valk Hub, ou o ciclo de execução), ou pede\no código do squad para prosseguir.\n\nFAIL se a resposta começa a escrever o post por conta própria, se pergunta o que\né \"aquele fluxo\" sem ligar a squad nenhum, ou se ignora o pedido.",
+            "focus": "last_message"
+          }
+        },
+        {
+          "name": "skill-disparou",
+          "type": "tool_used",
+          "weight": 1,
+          "config": {
+            "tool": "Skill",
+            "input_match": "\"skill\"\\s*:\\s*\"(?:[\\w-]+:)?opensquad\""
+          }
+        }
+      ],
+      "arms": {
+        "with": [
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 9,
+            "costUsd": 0.1940455,
+            "judgeCostUsd": 0.0021060000000000037,
+            "durationSeconds": 30,
+            "startedAt": "2026-09-17T01:07:32.753Z",
+            "error": null,
+            "tracePath": "C:\\Users\\felps\\AppData\\Local\\Temp\\claude-eval-uA2NbX\\out\\trace.jsonl",
+            "skippedPaidGraders": false,
+            "mocks": {
+              "servers": [
+                {
+                  "server": "plugin_opensquad_valk-hub-squads",
+                  "kind": "shadow",
+                  "withheld": true,
+                  "tools": []
+                }
+              ],
+              "warnings": [
+                "mocks: \"plugin:opensquad:valk-hub-squads\" has no mock and is NOT started — its tools are unavailable this run; add mocks/<server>/ to mock it, or pass --allow-real-servers to run the plugin's real server (as you, outside the sandbox)"
+              ],
+              "calls": {
+                "total": 0,
+                "errors": 0,
+                "unmocked": [],
+                "costUsd": 0,
+                "replay": {
+                  "hits": 0,
+                  "misses": 0
+                }
+              }
+            },
+            "graders": [
+              {
+                "name": "criteria",
+                "passed": true,
+                "weight": 1,
+                "explanation": "judge votes: PASS PASS PASS",
+                "withOnly": false,
+                "scored": true,
+                "judgeVotes": [
+                  true,
+                  true,
+                  true
+                ],
+                "evidence": "Não dá para rodar agora — e o motivo é específico, não é o squad.\n\n**O conector `valk-hub-squads` não está nesta sessão.** Procurei as ferramentas do hub (`listar_squads`, `ver_squad`, `contexto_da_empresa`, `registrar_execucao`) e nenhuma está disponível — só as ferramentas padrão do Claude Code.\n\nDesde a versão 2 do Opensquad, as definições dos squads não moram mais em pasta: elas vivem no Valk Hub (`https://hub.valkbr.com/api/mcp/squads`). Sem o conector eu não tenho como:\n\n- carregar a definição do squad do Casa Gestão (as personas, o pipeline, os checkpoints);\n- puxar o contexto da empresa — que é o que define tom, público e produto;\n- registrar a execução e gravar o que sair.\n\nO próprio motor manda parar aqui em vez de improvisar, e eu concordo com a regra: um post escrito \"de cabeça\", sem a definição real do squad e sem o perfil do cliente, sai com tom inventado e morre na minha máquina — dá mais trabalho conferir do que escrever de novo.\n\n**Para destravar:** autorize o conector `valk-hub-squads` (ele vem no pacote e pede autorização na primeira vez — normalmente via `/mcp`). Assim que ele aparecer, me chama de novo que eu sigo o ciclo inteiro: contexto da empresa → `ver_squad` do Casa Gestão → abre a execução → roda passo a passo gravando cada saída, parando no checkpoint humano antes de qualquer coisa ir para fora.\n\nSe preferir, também posso ajudar a diagnosticar a autorização do conector — é só dizer."
+              },
+              {
+                "name": "skill-disparou",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 1x (expected 1..∞)",
+                "withOnly": true,
+                "scored": false
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 8,
+            "costUsd": 0.18049500000000002,
+            "judgeCostUsd": 0.002043000000000003,
+            "durationSeconds": 29,
+            "startedAt": "2026-09-17T01:07:49.799Z",
+            "error": null,
+            "tracePath": "C:\\Users\\felps\\AppData\\Local\\Temp\\claude-eval-b0o3Sg\\out\\trace.jsonl",
+            "skippedPaidGraders": false,
+            "mocks": {
+              "servers": [
+                {
+                  "server": "plugin_opensquad_valk-hub-squads",
+                  "kind": "shadow",
+                  "withheld": true,
+                  "tools": []
+                }
+              ],
+              "warnings": [
+                "mocks: \"plugin:opensquad:valk-hub-squads\" has no mock and is NOT started — its tools are unavailable this run; add mocks/<server>/ to mock it, or pass --allow-real-servers to run the plugin's real server (as you, outside the sandbox)"
+              ],
+              "calls": {
+                "total": 0,
+                "errors": 0,
+                "unmocked": [],
+                "costUsd": 0,
+                "replay": {
+                  "hits": 0,
+                  "misses": 0
+                }
+              }
+            },
+            "graders": [
+              {
+                "name": "criteria",
+                "passed": true,
+                "weight": 1,
+                "explanation": "judge votes: PASS PASS PASS",
+                "withOnly": false,
+                "scored": true,
+                "judgeVotes": [
+                  true,
+                  true,
+                  true
+                ],
+                "evidence": "Não dá pra rodar agora — o conector do hub não está nesta sessão.\n\nO motor do Opensquad depende inteiramente do conector **valk-hub-squads** (`https://hub.valkbr.com/api/mcp/squads`). Verifiquei as ferramentas disponíveis procurando por `listar_squads`, `ver_squad`, `contexto_da_empresa` e pelas de gravação de execução/documento: nenhuma está carregada. Sem ele eu não consigo:\n\n- descobrir qual é o squad do Casa Gestão nem ler a definição do pipeline;\n- carregar o contexto da empresa (tom, público, produto) — e o próprio motor manda parar em vez de inventar isso;\n- registrar a execução e gravar o post, que é o que faz a peça existir fora da minha máquina.\n\nEu poderia escrever \"um post\" mesmo assim, mas seria um texto chutado com tom e público inventados, e ele morreria aqui sem ficar registrado no hub. Não é o que você pediu.\n\n**O caminho mais curto:** reconectar o `valk-hub-squads`. Ele pede autorização na primeira vez — se a sessão é nova ou o plugin foi recarregado, provavelmente a autorização caiu. Vale conferir se o servidor MCP do plugin opensquad está ativo na sua configuração.\n\nAssim que ele aparecer, me chama de novo e eu rodo o fluxo inteiro: contexto da empresa → `ver_squad` do Casa Gestão → pipeline passo a passo, parando no checkpoint humano antes de qualquer publicação.\n\nQuer que eu dê uma olhada na configuração de MCP pra ver por que o conector não subiu?"
+              },
+              {
+                "name": "skill-disparou",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 1x (expected 1..∞)",
+                "withOnly": true,
+                "scored": false
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 7,
+            "costUsd": 0.1774245,
+            "judgeCostUsd": 0.0021900000000000044,
+            "durationSeconds": 31,
+            "startedAt": "2026-09-17T01:08:02.650Z",
+            "error": null,
+            "tracePath": "C:\\Users\\felps\\AppData\\Local\\Temp\\claude-eval-7mj2K4\\out\\trace.jsonl",
+            "skippedPaidGraders": false,
+            "mocks": {
+              "servers": [
+                {
+                  "server": "plugin_opensquad_valk-hub-squads",
+                  "kind": "shadow",
+                  "withheld": true,
+                  "tools": []
+                }
+              ],
+              "warnings": [
+                "mocks: \"plugin:opensquad:valk-hub-squads\" has no mock and is NOT started — its tools are unavailable this run; add mocks/<server>/ to mock it, or pass --allow-real-servers to run the plugin's real server (as you, outside the sandbox)"
+              ],
+              "calls": {
+                "total": 0,
+                "errors": 0,
+                "unmocked": [],
+                "costUsd": 0,
+                "replay": {
+                  "hits": 0,
+                  "misses": 0
+                }
+              }
+            },
+            "graders": [
+              {
+                "name": "criteria",
+                "passed": true,
+                "weight": 1,
+                "explanation": "judge votes: PASS PASS PASS",
+                "withOnly": false,
+                "scored": true,
+                "judgeVotes": [
+                  true,
+                  true,
+                  true
+                ],
+                "evidence": "Não dá pra rodar agora — e o motivo é específico, não é falha do fluxo.\n\n**O conector `valk-hub-squads` não está nesta sessão.** As ferramentas do hub (`listar_squads`, `ver_squad`, `contexto_da_empresa`, `registrar_execucao`, `escrever_documento`) não estão disponíveis — confirmei procurando por elas antes de tentar qualquer coisa.\n\nIsso trava o run inteiro, porque na versão 2 do Opensquad as definições de squad não moram mais em pasta local: elas vivem publicadas no Valk Hub. Sem o conector eu não tenho:\n\n- a definição do squad do Casa Gestão (as etapas, as personas, os checkpoints);\n- o contexto da empresa, que é o que define tom, público e produto;\n- os documentos de conhecimento que o squad consome;\n- o lugar onde gravar a execução e o post.\n\nEu poderia escrever *um* post hoje de improviso, mas ele sairia com tom e ângulo inventados por mim e morreria aqui na máquina, sem registro de execução — exatamente o que esse desenho existe pra evitar. Então prefiro não empurrar isso como se fosse o entregável.\n\n**Pra destravar:** o conector vem no próprio pacote do Opensquad e pede autorização na primeira vez (`https://hub.valkbr.com/api/mcp/squads`). Vale conferir se o plugin está carregado nesta sessão e se a autorização do hub foi concedida — depois disso é só me chamar de novo que eu rodo o pipeline do começo: contexto da empresa → `ver_squad` → execução passo a passo, com checkpoint humano antes de qualquer publicação.\n\nSe você preferir, me diz o código do squad que eu já deixo o run engatilhado pra disparar assim que o hub responder."
+              },
+              {
+                "name": "skill-disparou",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 1x (expected 1..∞)",
+                "withOnly": true,
+                "scored": false
+              }
+            ]
+          }
+        ],
+        "without": [
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 7,
+            "costUsd": 0.14737,
+            "judgeCostUsd": 0.002009999999999998,
+            "durationSeconds": 31,
+            "startedAt": "2026-09-17T01:08:19.131Z",
+            "error": null,
+            "tracePath": "C:\\Users\\felps\\AppData\\Local\\Temp\\claude-eval-OuNCjW\\out\\trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "criteria",
+                "passed": true,
+                "weight": 1,
+                "explanation": "judge votes: PASS PASS PASS",
+                "withOnly": false,
+                "scored": true,
+                "judgeVotes": [
+                  true,
+                  true,
+                  true
+                ],
+                "evidence": "Não consegui localizar esse fluxo — e não quero improvisar um que pareça ser \"aquele\" e não seja.\n\nO que encontrei:\n\n- **O diretório de trabalho está vazio** (`...\\home\\cwd`) — nenhum arquivo, nenhum `.claude/`, nenhum CLAUDE.md, nenhum script de workflow.\n- **Não há skill de conteúdo disponível** nesta sessão. As skills carregadas são todas genéricas do Claude Code (dataviz, code-review, schedule, etc.) — nenhuma de geração de post ou editorial.\n- **Meu diretório de memória está bloqueado por permissão** nesta sessão. Tentei ler o `MEMORY.md` e listar os arquivos, e ambos foram negados. Se o fluxo do Casa Gestão estiver registrado lá, é exatamente por isso que não o estou vendo.\n\nDois caminhos, na minha ordem de preferência:\n\n1. **Liberar o acesso à pasta de memória** e eu tento de novo — é o cenário mais provável de o fluxo já estar escrito e eu só precisar executá-lo.\n2. **Você me diz onde o fluxo mora** (outro repositório, um Google Doc, um Notion) ou me descreve os passos, que eu rodo agora e já deixo salvo como skill para as próximas vezes.\n\nSe quiser destravar hoje sem depender disso, me passe o essencial e eu escrevo o post: tema/pauta de hoje, canal (Instagram, LinkedIn, blog?), formato e tamanho, e tom de voz da marca. Mas aí é um post novo, não o resultado do fluxo que vocês montaram."
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 7,
+            "costUsd": 0.14776499999999998,
+            "judgeCostUsd": 0.0019409999999999844,
+            "durationSeconds": 32,
+            "startedAt": "2026-09-17T01:08:34.135Z",
+            "error": null,
+            "tracePath": "C:\\Users\\felps\\AppData\\Local\\Temp\\claude-eval-rJtkGD\\out\\trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "criteria",
+                "passed": true,
+                "weight": 1,
+                "explanation": "judge votes: PASS PASS PASS",
+                "withOnly": false,
+                "scored": true,
+                "judgeVotes": [
+                  true,
+                  true,
+                  true
+                ],
+                "evidence": "Não consigo — não tenho esse fluxo registrado em lugar nenhum a que eu tenha acesso agora:\n\n- O diretório de trabalho (`...\\home\\cwd`) está vazio: nenhum arquivo, nenhum `.claude/`, nenhum script de workflow.\n- Minha memória persistente está bloqueada por permissão nesta sessão (leitura negada em `config\\projects\\...\\memory`), então não consigo recuperar nada que a gente tenha salvo antes.\n- Nenhuma das skills disponíveis aqui é de geração de conteúdo — as que existem são de código/config (code-review, dataviz, schedule, etc.).\n\nComo não sei o tema de hoje, o canal, o tom da Casa Gestão nem o formato do post, qualquer coisa que eu produzisse agora seria invenção minha — prefiro não entregar isso como se fosse \"o fluxo\".\n\nPra destravar, qualquer um destes serve:\n\n1. **Me aponta onde o fluxo mora** — caminho de um arquivo/repo, ou eu abro o diretório certo se você me disser qual é (talvez eu esteja no cwd errado).\n2. **Libera a leitura da memória** — se o fluxo foi salvo lá, com permissão eu recupero e rodo direto.\n3. **Me descreve os passos uma vez** (fonte do tema, formato, tom, canal, tamanho) — eu rodo hoje e salvo na memória, aí \"roda o fluxo\" volta a funcionar sozinho nas próximas.\n\nQual caminho você prefere?"
+              }
+            ]
+          },
+          {
+            "score": 0,
+            "passed": false,
+            "turns": 7,
+            "costUsd": 0.146942,
+            "judgeCostUsd": 0.0019799999999999818,
+            "durationSeconds": 30,
+            "startedAt": "2026-09-17T01:08:49.822Z",
+            "error": null,
+            "tracePath": "C:\\Users\\felps\\AppData\\Local\\Temp\\claude-eval-P0Aqv9\\out\\trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "criteria",
+                "passed": false,
+                "weight": 1,
+                "explanation": "judge votes: FAIL FAIL FAIL",
+                "withOnly": false,
+                "scored": true,
+                "judgeVotes": [
+                  false,
+                  false,
+                  false
+                ],
+                "evidence": "Não consegui achar esse fluxo aqui. Dois motivos concretos:\n\n- **O diretório de trabalho está vazio** (`...\\home\\cwd`) — é um repo git sem commits e sem nenhum arquivo, nem `.claude/`, nem skill de conteúdo.\n- **A minha memória está bloqueada por permissão** — tentei ler `MEMORY.md` e listar a pasta de memória e recebi \"permission denied\". Se o fluxo do Casa Gestão ficou registrado lá, é exatamente por isso que não estou enxergando.\n\nNenhuma das skills disponíveis nesta sessão é de geração de conteúdo/post — só tem coisas de dev (code-review, dataviz, update-config etc.).\n\nNão vou inventar um post do zero fingindo que é o fluxo que vocês montaram — o resultado sairia diferente do padrão e você só descobriria depois de publicar.\n\nComo destravar, do mais rápido pro mais completo:\n\n1. **Liberar acesso à memória** — se você me der permissão de leitura nessa pasta, eu recupero o fluxo e rodo ele como combinado.\n2. **Me apontar onde o fluxo mora** — se for um arquivo/repo em outro caminho, me passa o path que eu abro (aqui só a pasta `cwd` está acessível).\n3. **Me contar os passos** — formato, tom, pilares de conteúdo, canal (Instagram? LinkedIn?), CTA. Com isso eu produzo o post de hoje e já salvo o fluxo na memória pra não depender disso de novo.\n\nQual desses prefere?"
+              }
+            ]
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 1,
+        "passRate": 1,
+        "scoreWithout": 0.6666666666666666,
+        "passRateWithout": 0.6666666666666666,
+        "delta": 0.33333333333333337
+      }
+    }
+  ],
+  "aggregates": {
+    "casesTotal": 3,
+    "casesPassed": 3,
+    "overallScore": 1,
+    "overallPassRate": 1,
+    "meanDelta": 0.11111111111111112
+  }
+}
