@@ -1,19 +1,33 @@
-> ## MODO DEGRADADO — leia antes de seguir
+> ## O NAVEGADOR É O CAMINHO PRINCIPAL. Leia antes de seguir.
 >
-> **As instruções abaixo dependem de um navegador com sessão logada guardada na
-> máquina de quem executa.** Isso funcionava quando o Opensquad era uma pasta
-> clonada; não atravessa para um pacote distribuído pela organização, e uma
-> sessão de nuvem não abre navegador local.
+> A investigação de perfis acontece **no navegador da sua sessão**, com a sessão
+> logada de quem está rodando. Não é uma ferramenta do conector, e não é
+> raspagem por API.
 >
-> Enquanto a tarefa **#951** não entregar o substituto, a investigação:
+> **Isso é decisão, e o motivo importa:** só o navegador logado alcança perfil
+> privado, e só ele lê o texto de um slide de carrossel **como texto
+> renderizado** em vez de adivinhá-lo de uma imagem. Um coletor por API
+> entregaria menos e cobraria por item.
 >
-> - roda **só** para quem tem o repositório antigo na máquina, com o navegador
->   configurado;
-> - cobre, para todo mundo, o que é **público** — e **diz o que não conseguiu
->   ver**, em vez de entregar um retrato parcial como se fosse inteiro.
+> **A ordem é: Claude in Chrome primeiro, Playwright se ele não estiver.**
+> Ver "Browser Automation" abaixo.
 >
-> Dizer o limite não é ressalva de rodapé: um perfil analisado pela metade, sem
-> aviso, vira referência errada dentro de um squad que muita gente vai rodar.
+> ### Quando NÃO há navegador
+>
+> Sessão sem navegador nenhum não investiga. **Diga isso e pare** — não tente
+> reconstruir o perfil por busca na web, por memória, nem por palpite.
+>
+> Um perfil analisado pela metade, sem aviso, vira referência errada dentro de um
+> squad que muita gente vai rodar. Declarar a falta é desfecho legítimo; entregar
+> retrato parcial como se fosse inteiro, não.
+>
+> ### O resultado vai para o hub
+>
+> O que a investigação produz é **documento no hub**, por `escrever_documento`,
+> como todo artefato de squad. O navegador é o olho; o arquivo é da casa.
+>
+> Isso não contradiz a regra de que nada mora na máquina de quem rodou: aquela
+> regra é sobre onde o trabalho é GUARDADO, e não sobre de onde ele é lido.
 
 # Sherlock — Shared Core
 
@@ -25,13 +39,25 @@ When a user provides reference profile URLs during squad discovery ("follow the 
 
 The investigation output feeds directly into squad data files — making agents, frameworks, quality criteria, and voice guidance grounded in real high-performing content rather than generic best practices.
 
-## Session Management (ALWAYS inform the user)
+## O aviso de sessão, e quando ele vale
 
-At the START of every investigation, before any browser action, tell the user:
+**Com Claude in Chrome: não há aviso a dar, porque não há sessão guardada.** Ele
+usa o Chrome que a pessoa já tem aberto e logado. Nada é copiado, nada fica em
+disco, nada expira.
 
-> "Your browser sessions are saved in `_opensquad/_browser_profile/`. To clear a platform's session, just delete the JSON file (e.g., `instagram.json`). I'll ask before saving any new session."
+O que continua valendo ali é a outra metade: **diga que você vai abrir uma aba no
+navegador dela**, e em qual perfil você vai entrar. Ninguém deve descobrir que um
+agente andou pelo Instagram no navegador dela sem ter sido avisado.
 
-This notice is mandatory for every investigation run, even if sessions already exist.
+**Com Playwright: o aviso é obrigatório**, antes de qualquer login, porque aí
+existe credencial em disco:
+
+> "Vou abrir um navegador limpo. Se você logar, a sessão fica guardada em
+> `_opensquad/_browser_profile/{plataforma}.json` nesta máquina. Apagar o arquivo
+> apaga a sessão. Posso seguir?"
+
+Sessão de rede social em disco é credencial. Ela merece o mesmo cuidado de uma
+senha, e a pessoa precisa saber que ela existe ANTES, não depois.
 
 ---
 
@@ -50,43 +76,68 @@ This notice is mandatory for every investigation run, even if sessions already e
 
 ## Browser Automation
 
-Sherlock uses Playwright CLI for browser automation. Use `npx playwright` commands to:
-- Navigate to URLs
-- Read page content via snapshots
-- Click elements
-- Scroll for more content
-- Save and restore sessions
+**Ordem obrigatória: Claude in Chrome primeiro, Playwright como reserva.**
 
-### Session Persistence
+### 1. Claude in Chrome (preferido)
 
-Browser sessions are stored as JSON files in `_opensquad/_browser_profile/`:
+Ferramentas `mcp__claude-in-chrome__*`. Ele dirige o **Chrome da própria
+pessoa**, que já está logado nas redes — não há sessão para guardar, restaurar
+nem expirar.
 
-- Instagram: `_opensquad/_browser_profile/instagram.json`
-- YouTube: `_opensquad/_browser_profile/youtube.json`
-- Twitter/X: `_opensquad/_browser_profile/twitter.json`
-- LinkedIn: `_opensquad/_browser_profile/linkedin.json`
+Antes de qualquer outra coisa, chame `tabs_context_mcp`. Depois crie uma aba
+nova com `tabs_create_mcp` para esta investigação, em vez de reaproveitar uma
+que a pessoa esteja usando.
 
-**Loading a session (Playwright CLI):**
-```bash
-npx playwright open --load-storage=_opensquad/_browser_profile/{platform}.json {url}
+O ciclo de leitura é: `navigate` → `read_page` (ou `get_page_text`) → `find` para
+localizar o que interessa → `computer` para clicar e rolar.
+
+**Três regras que valem aqui e custam caro quando esquecidas:**
+
+- **Nunca dispare caixa de diálogo do navegador** (`alert`, `confirm`). Elas
+  travam a extensão e a sessão para de responder até alguém fechar à mão.
+- **Nunca resolva CAPTCHA nem contorne verificação de robô.** Se aparecer uma,
+  pare e diga.
+- **Você está no navegador logado de uma pessoa.** Não curta, não siga, não
+  comente, não mande mensagem. Investigação é leitura. Qualquer ação que deixe
+  rastro na conta dela precisa de autorização explícita, na conversa.
+
+### 2. Playwright (reserva)
+
+Só quando o Claude in Chrome não estiver disponível na sessão. Ferramentas
+`mcp__playwright__*`, ou o CLI (`npx playwright`).
+
+Aqui a sessão **é** um problema, e por isso ele é a segunda opção: o Playwright
+abre um navegador limpo, sem login. Para alcançar o que exige sessão, é preciso
+uma pessoa logar uma vez e o perfil ser guardado:
+
+```
+_opensquad/_browser_profile/{plataforma}.json
 ```
 
-**Saving a session (Playwright CLI):**
-```bash
-npx playwright open --save-storage=_opensquad/_browser_profile/{platform}.json {url}
-```
+**Avise a pessoa antes de guardar qualquer sessão**, e diga onde o arquivo fica e
+como apagá-lo. Sessão de rede social guardada em disco é credencial: ela merece
+o mesmo cuidado de uma senha, e ninguém deve descobrir depois que ela existe.
 
-When using MCP browser tools or other automation APIs, use these JSON files as the source of truth for session state — load the stored cookies/localStorage at the start of each investigation and save after login when the user consents.
+### Como escolher, na prática
+
+1. As ferramentas `mcp__claude-in-chrome__*` estão na sessão? Use-as.
+2. Não estão, mas `mcp__playwright__*` está? Use o Playwright, e diga à pessoa
+   que a cobertura cai para o que é público, a menos que ela faça login.
+3. Nenhum dos dois? **Pare e diga.** Ver o cabeçalho.
 
 ### Screenshot Saving Rule
 
-When saving a browser screenshot as a file, always specify the full path:
+Print é RASCUNHO, e rascunho não vai para o hub.
 
-```
-squads/{squad-name}/_investigations/{username}/screenshots/{filename}.png
-```
+Quando precisar guardar um print para reler durante a investigação, salve num
+caminho temporário da máquina, com nome completo. Nunca sem caminho: sem ele o
+arquivo cai na raiz de onde você rodou.
 
-Never save screenshots without a full output path — omitting the path saves the file to the repo root, polluting the project.
+**O que vai para o hub é o ACHADO, não a captura.** A análise do perfil é
+documento (`escrever_documento`); um print só sobe como anexo da execução
+(`gravar_arquivo_da_execucao`) quando ele próprio é o entregável — uma peça de
+referência que alguém vai olhar depois, e não uma tela que você olhou no meio do
+caminho.
 
 For content reading and navigation, prefer snapshots (live view, no file saved) over screenshots.
 
@@ -116,7 +167,7 @@ Before running any Sherlock investigation, verify the required tools are availab
 
 ### Required for All Investigations
 
-- **Browser automation**: The agent must have access to browser automation tools (Playwright CLI via `npx playwright`, MCP browser tools, or equivalent). These are required for every investigation.
+- **Navegador**: `mcp__claude-in-chrome__*` (preferido) ou `mcp__playwright__*` (reserva). Sem nenhum dos dois, a investigação NÃO acontece: diga isso e pare.
 
 ### Required Only for Video Content (Reels, YouTube, TikTok)
 

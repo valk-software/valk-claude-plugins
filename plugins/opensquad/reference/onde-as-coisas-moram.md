@@ -29,6 +29,21 @@ Isto é motor. Muda uma vez por mês, e chega por atualização do plugin.
 Sempre `${CLAUDE_PLUGIN_ROOT}`, nunca caminho relativo ao projeto: um plugin roda
 a partir de qualquer pasta, inclusive de uma pasta vazia.
 
+## O que vem da SUA SESSÃO, e não do pacote nem do hub
+
+Uma coisa só, e ela é exceção de propósito: **o navegador**.
+
+| O quê | De onde |
+|---|---|
+| Investigar perfil de referência | `mcp__claude-in-chrome__*`, ou `mcp__playwright__*` de reserva |
+
+Só o navegador logado alcança perfil privado e lê o texto de um slide como texto
+renderizado. Isso não contradiz a regra do alto: ela é sobre onde o trabalho é
+GUARDADO, e o resultado da investigação vai para o hub como documento. O
+navegador é o olho; o arquivo é da casa.
+
+**Sessão sem navegador não investiga**, e dizer isso é desfecho legítimo.
+
 **Leia, nunca escreva.** A pasta do plugin é substituída inteira a cada
 atualização: o que você gravar aqui some sem aviso na próxima versão. Isso vale
 inclusive para a saída do `ref-analyzer`, que por isso cai na pasta de onde
@@ -57,7 +72,6 @@ Pelo conector **valk-hub-squads**.
 | Corrigir um passo | `corrigir_documento` — **nunca** um documento novo |
 | CRIAR uma imagem | `gerar_imagem` (ela já grava no passo, sem `gravar_arquivo` depois) |
 | Publicar um carrossel | `publicar_no_instagram`, e sem `confirmar: true` é só preview |
-| Estudar um perfil de referência | `investigar_perfil`, e LEIA a `cobertura` que vem junto |
 | Publicar ou corrigir um squad | `publicar_squad` |
 | Trabalho para uma pessoa | `criar_tarefa` |
 | Fechar a execução | `registrar_execucao` **com** `execucao_id`, tokens e custo |

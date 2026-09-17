@@ -16,7 +16,7 @@ This file contains the LinkedIn-specific extraction process. The Architect loads
 
 ## Activity Feed Extraction
 
-1. Navigate to the user's recent activity page using browser automation with the saved LinkedIn session:
+1. Abra a página de atividade recente no navegador. Com Claude in Chrome a sessão já está logada:
    ```bash
    npx playwright open --load-storage=_opensquad/_browser_profile/linkedin.json https://www.linkedin.com/in/{username}/recent-activity/all/
    ```

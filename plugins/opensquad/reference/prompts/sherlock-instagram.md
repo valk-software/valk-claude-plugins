@@ -23,14 +23,15 @@ Before starting extraction, check the `investigation_mode` value from the Archit
 
 Load the Instagram session before navigating:
 ```bash
-npx playwright open --load-storage=_opensquad/_browser_profile/instagram.json https://www.instagram.com/{username}/
+Com Claude in Chrome: `navigate` para https://www.instagram.com/{username}/
+Com Playwright (reserva): npx playwright open --load-storage=_opensquad/_browser_profile/instagram.json https://www.instagram.com/{username}/
 ```
 
 ---
 
 ## Profile Grid Extraction
 
-1. Navigate to the profile page using browser automation with the saved Instagram session.
+1. Abra o perfil no navegador. Com Claude in Chrome a sessão da pessoa já está logada; com Playwright, ver o aviso de sessão em `sherlock-shared.md`.
 
 2. Take a snapshot to read the profile grid.
 

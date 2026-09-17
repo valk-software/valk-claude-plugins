@@ -81,36 +81,41 @@ Quando a pessoa digita `/opensquad` ou pede o menu, use AskUserQuestion:
 
 ### Fase 2: Investigação (opcional)
 
-Se a descoberta pedir investigação de perfis de referência, use
-**`investigar_perfil`**, do conector. Ela coleta os posts públicos e, com
-`ler_imagens: true`, **transcreve o texto escrito dentro dos slides** — que é o
-que o método antigo alcançava abrindo o carrossel e avançando seta por seta.
+Se a descoberta pedir investigação de perfis de referência, ela acontece **no
+navegador da sua sessão**, com a sessão logada de quem está rodando. Não é
+ferramenta do conector.
 
-```
-investigar_perfil({ plataforma: "instagram", perfil: "@alguem",
-                    quantos_posts: 3, ler_imagens: true })
-```
+Leia `${CLAUDE_PLUGIN_ROOT}/reference/prompts/sherlock-shared.md` mais o extrator
+da plataforma (`sherlock-instagram.md`, `sherlock-youtube.md`,
+`sherlock-twitter.md`, `sherlock-linkedin.md`).
 
-**Leia a `cobertura` que vem na resposta antes de concluir qualquer coisa.** Ela
-diz o que aquela coleta alcança e o que não alcança, e a diferença muda a
-leitura: "zero salvamentos" ali quer dizer *não dá para saber*, não *ninguém
-salvou*.
+**A ordem é obrigatória: Claude in Chrome primeiro, Playwright se ele não
+estiver.** O Chrome da pessoa já está logado, então não há sessão para guardar
+nem expirar; o Playwright abre um navegador limpo e exige login, com credencial
+em disco e aviso antes.
 
-Duas coisas que precisam ser ditas quando você usar isto:
+**Por que navegador e não raspagem por API:** só o navegador logado alcança
+perfil privado, e só ele lê o texto de um slide de carrossel **como texto
+renderizado** em vez de adivinhá-lo de uma imagem. Um coletor por API entrega
+menos e cobra por item. Isto já foi construído e desfeito em 17/09/2026 — não
+reconstrua.
 
-- **A transcrição dos slides é aproximada.** Um modelo lendo um PNG erra em
-  fonte fina, texto sobre foto e número comprido. Se for citar um número que
-  saiu de um slide, confira na imagem antes.
-- **Cada chamada custa em duas contas** — a raspagem cobra por item, e a leitura
-  das imagens cobra no painel de IA. Peça poucos posts, e não repita a mesma
-  coleta para "conferir".
+**Três regras, porque você está no navegador de uma pessoa:**
 
-> **O que continua fora de alcance.** Perfil privado, salvamentos,
-> compartilhamentos e stories. Aquilo dependia de uma sessão logada, que por
-> definição é de uma pessoa e de uma máquina, e não atravessa para um pacote
-> distribuído. Os arquivos `sherlock-*.md` descrevem o método antigo, de
-> navegador: eles valem como referência do que se extraía, e não como
-> instrução do que fazer hoje.
+- Investigação é **leitura**. Não curta, não siga, não comente, não mande
+  mensagem. Qualquer coisa que deixe rastro na conta dela precisa de autorização
+  explícita, na conversa.
+- **Diga antes** que vai abrir uma aba e em qual perfil vai entrar.
+- Não resolva CAPTCHA nem dispare caixa de diálogo do navegador — a segunda
+  trava a extensão até alguém fechar à mão.
+
+**O resultado vai para o hub**, por `escrever_documento`, como todo artefato. O
+navegador é o olho; o arquivo é da casa.
+
+> **Sem navegador nenhum na sessão, a investigação NÃO acontece.** Diga isso e
+> pare. Não reconstrua o perfil por busca na web nem por memória: um perfil
+> analisado pela metade, sem aviso, vira referência errada dentro de um squad que
+> muita gente vai rodar. Declarar a falta é desfecho legítimo.
 
 ### Fase 3: Desenho
 
@@ -248,8 +253,8 @@ EMPRESA
 FERRAMENTAS
   ref-analyzer                manda um link de vídeo e eu destilo a receita
                               visual (paleta, corte, tipografia, gancho)
-  investigar_perfil           lê um perfil de referência e transcreve o
-                              texto dos slides. Vem com o que ela NÃO vê
+  investigação de perfil      no NAVEGADOR da sessão, logado. Chrome
+                              primeiro, Playwright de reserva
   gerar_imagem                cria imagem e já grava no passo
   publicar_no_instagram       publica carrossel. Pede confirmação
 
