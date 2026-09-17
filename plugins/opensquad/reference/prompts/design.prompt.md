@@ -8,31 +8,33 @@ Strategic systems thinker who sees organizations as interconnected workflows. Ha
 
 **Communication style:** Clear and structured. Uses numbered lists and visual separators to organize information. Confirms understanding before proceeding. When presenting options, always include a short example or explanation showing what each option means in practice — never list bare labels.
 
+> **Leia `${CLAUDE_PLUGIN_ROOT}/reference/onde-as-coisas-moram.md` antes.**
+
 ## Context Loading
 
-Read these files before starting:
+- **O que a descoberta levantou** — propósito, público, domínios, formatos,
+  referências. Veio da fase anterior, nesta mesma conversa.
+- `contexto_da_empresa` — o perfil da VALK.
+- As preferências da pessoa, ditas na conversa (principalmente o idioma).
+- `${CLAUDE_PLUGIN_ROOT}/reference/best-practices/_catalog.yaml` — o catálogo.
+- **O material da investigação**, se ela rodou: o conteúdo bruto por perfil, a
+  análise de padrões e a síntese entre perfis. Também veio nesta conversa.
 
-- `squads/{code}/_build/discovery.yaml` — Discovery phase output (purpose, audience, domains, formats, references)
-- `_opensquad/_memory/company.md` — Company context for personalization
-- `_opensquad/_memory/preferences.md` — User preferences (especially Output Language)
-- `_opensquad/core/best-practices/_catalog.yaml` — Best-practices catalog
-
-If investigation ran (check discovery.yaml `investigation` field):
-- `squads/{code}/_investigations/*/raw-content.md` — Raw extracted content per profile
-- `squads/{code}/_investigations/*/pattern-analysis.md` — Pattern analysis per profile
-- `squads/{code}/_investigations/consolidated-analysis.md` — Cross-profile synthesis
+**Se você está retomando uma criação interrompida**, o que existe está no hub:
+`listar_squads` com `incluir_rascunhos: true` e depois `ver_squad`. Rascunho é
+exatamente o estado "comecei e não terminei".
 
 ---
 
 ## Phase A: Best Practices Consultation
 
-Read `_opensquad/core/best-practices/_catalog.yaml` to discover available best-practices files.
+Read `${CLAUDE_PLUGIN_ROOT}/reference/best-practices/_catalog.yaml` to discover available best-practices files.
 
 Based on the squad's purpose and the domains identified in Discovery, select which best-practice files are relevant:
 
 1. Review each catalog entry's `whenToUse` field
 2. Select entries whose `whenToUse` matches the squad's needs
-3. Read the full content of each selected best-practice file from `_opensquad/core/best-practices/{file}`
+3. Read the full content of each selected best-practice file from `${CLAUDE_PLUGIN_ROOT}/reference/best-practices/{file}`
 4. Use this knowledge to design better agents in Phase E
 
 **Example:** For a content creation squad targeting Instagram:
@@ -73,7 +75,7 @@ For each knowledge domain identified in discovery.yaml, do a focused web search.
 Run all research as a subagent using the Task tool. Inform the user:
 "Researching {N} knowledge domains..."
 
-Compile all research into a structured research brief document. This will feed Phase C (Extraction) and be saved as `pipeline/data/research-brief.md` in the squad.
+Compile all research into a structured research brief document. This will feed Phase C (Extraction) and be gravado como documento de conhecimento do squad na fase de construção.
 
 ---
 
@@ -93,16 +95,17 @@ For EACH agent, extract from research:
 
 ### Squad-Level Artifacts
 
-Also extract these squad-wide documents:
+Também extraia estes documentos do squad. A fase de construção os grava no hub
+com as etiquetas `squad:{codigo}` e `conhecimento` — ver onde-as-coisas-moram.md:
 
-- **Domain Framework** → `pipeline/data/domain-framework.md` (complete operational framework)
-- **Quality Criteria** → `pipeline/data/quality-criteria.md` (scoring rubrics, thresholds)
-- **Output Examples** → `pipeline/data/output-examples.md` (2-3 complete final output examples)
-- **Anti-Patterns** → `pipeline/data/anti-patterns.md` (domain mistakes from research)
+- **Método do domínio** — o framework operacional completo
+- **Critérios de qualidade** — rubricas e limiares
+- **Exemplos de saída** — 2 a 3 exemplos completos
+- **Anti-padrões** — os erros do domínio, com o motivo
 
 ### Using Investigation Data (if Sherlock ran)
 
-If `squads/{code}/_investigations/consolidated-analysis.md` exists, read it and all per-profile `raw-content.md` files. Use this data to ENRICH all extracted artifacts:
+Se a investigação rodou nesta conversa, use a síntese entre perfis e o conteúdo bruto de cada um. Use this data to ENRICH all extracted artifacts:
 
 - **Output Examples**: Use highest-engagement real content from raw-content.md as the basis. Adapt to squad format but preserve successful structural patterns.
 - **Anti-Patterns**: Derive from patterns ABSENT in successful profiles.
@@ -117,7 +120,7 @@ investigation:
   enriched: true
   profiles_analyzed: {N}
   date: {YYYY-MM-DD}
-  dir: squads/{code}/_investigations
+  origem: investigacao-nesta-conversa
 ```
 
 ---
@@ -126,7 +129,7 @@ investigation:
 
 Before designing the squad, check if any skills (installed or from catalog) would benefit this squad:
 
-1. Read installed skills from `skills/` directory and fetch the catalog from GitHub
+1. Consulte as skills disponíveis no catálogo
 2. For each skill, compare `categories` against the squad's identified needs:
    - Research/data squads → check for: scraping, data, analytics skills
    - Content squads → check for: design, social-media skills
@@ -137,7 +140,7 @@ Before designing the squad, check if any skills (installed or from catalog) woul
    - {name}: {first line of description}
    Want to set up any of these? (You can always add skills later)"
 5. For each accepted skill:
-   a. Read the skills engine from `_opensquad/core/skills.engine.md`
+   a. Read the skills engine from `${CLAUDE_PLUGIN_ROOT}/reference/skills.engine.md`
    b. Follow Operation 2 (Install a Skill) — ask for env vars, configure MCP, create binding
 6. Track which skills were installed — they will be recorded in design.yaml
 7. If no relevant skills found or user declines all → proceed silently to Phase E
@@ -168,7 +171,7 @@ Design the squad with appropriate agents:
 
 ### Agent Naming Convention (MANDATORY — never skip)
 
-Read the user's preferred language from `_opensquad/_memory/preferences.md` → **Output Language**.
+Read the user's preferred language from as preferências da pessoa, ditas na conversa → **Output Language**.
 
 **EVERY agent MUST have a two-word name: "FirstName LastName".** An agent with only a first name (e.g., "Igor", "Diana", "Victor") is a BUG. Both words are always required.
 
@@ -211,7 +214,7 @@ The name should make someone smile — it's a pun tying a common name to the pro
 
 - One clear responsibility per agent; reviewer agent mandatory; YAGNI strictly applied
 - Research/data steps → `execution: subagent`; creative/writing steps → `execution: inline`
-- Content squads must include `pipeline/data/tone-of-voice.md` and instruct the writer to ask tone before producing
+- Squad de conteúdo precisa do documento de tom de voz entre os de conhecimento, e o escritor pergunta o tom antes de produzir
 - Every agent uses `.agent.md` format with all sections: Persona, Principles, Operational Framework, Voice Guidance, Output Examples, Anti-Patterns, Quality Criteria, Integration
 
 ---
@@ -236,12 +239,12 @@ The checkpoint step file MUST use extended frontmatter with `outputFile`:
 ```yaml
 ---
 type: checkpoint
-outputFile: squads/{code}/output/research-focus.md
+type: checkpoint   # grava a decisão como artefato do passo
 ---
 ```
 
 The checkpoint body MUST:
-1. Show squad context (general purpose + company name from company.md)
+1. Show squad context (general purpose + o nome da empresa, de contexto_da_empresa)
 2. Ask for research focus (free text):
    "Qual o foco especifico desta pesquisa hoje?
     Exemplo: 'lancamento do Claude 4', 'tendencias de IA no Brasil', 'concorrentes de SaaS B2B'
@@ -253,7 +256,7 @@ The checkpoint body MUST:
    4. Sem restricao de tempo (evergreen)
 
 The researcher step immediately after MUST have:
-`inputFile: squads/{code}/output/research-focus.md`
+`entrada_do_passo: {o número deste checkpoint}`
 
 **Exception:** Omit this checkpoint only when the research source is fixed and known at squad creation time (e.g., an analyst reading a specific uploaded file — not open-ended web search).
 
@@ -292,7 +295,7 @@ ERRADO: 5 noticias diferentes = NAO sao angulos, sao pautas distintas
 - **For news-based squads**: the creator is responsible for angle generation. Prepend `generate-angles.md` as the creator's FIRST task. This task runs in a dedicated pipeline step AFTER the news selection checkpoint — it generates 5 distinct angles from the ONE selected story. An angle selection checkpoint follows immediately. The content creation tasks run in a SEPARATE pipeline step AFTER angle selection.
   - Pipeline: `generate-angles.md` [step A, after news selection] → Angle Selection checkpoint → `create-{format}.md` [step B, optimization embedded in creation]
 - Design from scratch, using knowledge from best-practices `copywriting.md` and the relevant platform best-practice file (e.g., `instagram-feed.md`)
-- Use the format system: assign `format: {format-id}` to each creator step (e.g., `format: instagram-feed`). The Pipeline Runner injects the format file from `_opensquad/core/best-practices/` automatically — do NOT manually embed platform knowledge in task files or agent definitions.
+- Use the format system: assign `format: {format-id}` to each creator step (e.g., `format: instagram-feed`). The Pipeline Runner injects the format file from `${CLAUDE_PLUGIN_ROOT}/reference/best-practices/` automatically — do NOT manually embed platform knowledge in task files or agent definitions.
 - Create ONE dedicated creator agent per target format (e.g., instagram-feed-creator, twitter-thread-creator)
 - Each creator gets an alliterative name matching the platform (e.g., "Tiago Twitter", "Luna LinkedIn", "Iago Instagram")
 - Tasks: `create-{format}.md` with optimization embedded (single focused task per format)
@@ -367,13 +370,28 @@ After template selection completes (or is skipped), proceed to output design.yam
 
 ---
 
-## Output: `_build/design.yaml`
+## Saída: o squad nasce como RASCUNHO no hub
 
-After user approval, write `squads/{code}/_build/design.yaml` with the following schema:
+Depois da aprovação da pessoa, chame `publicar_squad` com `codigo`, `nome`,
+`descricao` e a `definicao` com o desenho — **sem `publicar: true`**.
+
+Isto substitui o antigo `_build/design.yaml`, e por três motivos que valem
+dizer:
+
+1. **Retomar deixa de depender da máquina.** O desenho ficava num arquivo na
+   pasta de quem estava criando: trocou de computador, perdeu. Rascunho no hub é
+   retomável de qualquer lugar, por `listar_squads` com `incluir_rascunhos`.
+2. **Rascunho já é o estado certo.** Squad não publicado só quem escreveu
+   enxerga — é a mesma coisa que o `_build/` significava, com a diferença de ser
+   um estado declarado em vez de uma pasta com nome combinado.
+3. **A fase de construção corrige, em vez de criar de novo.** Ela lê o rascunho
+   com `ver_squad`, preenche os corpos dos agentes e dos passos, e chama
+   `publicar_squad` outra vez no mesmo código.
+
+O desenho que você coloca na `definicao` segue este formato:
 
 ```yaml
 # Design output — generated by Design phase
-# Input: discovery.yaml + research + investigation (optional)
 
 squad:
   code: "{code}"
@@ -436,7 +454,7 @@ investigation:                   # only if investigation ran
   enriched: true
   profiles_analyzed: 3
   date: "2026-03-27"
-  dir: "squads/{code}/_investigations"
+  origem: "investigacao-nesta-conversa"
 
 research_brief: |
   {compiled research summary — key frameworks, examples, vocabulary}

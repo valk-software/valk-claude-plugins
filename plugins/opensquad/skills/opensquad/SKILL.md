@@ -16,6 +16,11 @@ agentes da VALK.
 > Na prática: você não procura squad em pasta nenhuma. Você chama
 > `listar_squads` e `ver_squad`, do conector `valk-hub-squads`, que este pacote
 > já traz configurado.
+>
+> **De onde vem e para onde vai cada coisa está em
+> `${CLAUDE_PLUGIN_ROOT}/reference/onde-as-coisas-moram.md`.** Esse é o único
+> arquivo que nomeia lugar; os outros apontam para ele. Se você precisar dizer
+> onde algo fica, leia de lá em vez de inventar um caminho.
 
 ## Antes de qualquer coisa: o conector
 
@@ -94,14 +99,27 @@ best-practices por formato estão em
 `${CLAUDE_PLUGIN_ROOT}/reference/best-practices/`, com o índice em
 `_catalog.yaml`.
 
+**No fim desta fase o squad já nasce, como RASCUNHO**, com `publicar_squad` sem
+`publicar: true`. É o que permite retomar uma criação interrompida de qualquer
+máquina — antes o desenho ficava num arquivo na pasta de quem estava criando, e
+trocar de computador perdia o trabalho.
+
 ### Fase 4: Construção
 
 Leia `${CLAUDE_PLUGIN_ROOT}/reference/prompts/build.prompt.md`.
 
-**O resultado NÃO é arquivo em pasta.** O squad construído vira uma chamada de
-`publicar_squad`, com o código, o nome, a descrição e a definição. Sem
-`publicar: true` ele nasce rascunho, e rascunho só quem escreveu enxerga — é
-assim que se testa um squad sem empurrá-lo para a organização inteira.
+Ela lê o rascunho com `ver_squad`, preenche os corpos dos agentes e dos passos,
+e chama `publicar_squad` de novo no mesmo código. **Nenhum arquivo é escrito em
+pasta.**
+
+Publique para a organização só depois de rodar uma vez e ver que presta.
+Publicar um squad que nunca rodou é empurrar para todo mundo um trabalho que
+ninguém conferiu.
+
+### Retomar uma criação
+
+`listar_squads` com `incluir_rascunhos: true`. Rascunho é exatamente o estado
+"comecei e não terminei", e ele está no hub, não na máquina.
 
 ## Rodar um squad
 

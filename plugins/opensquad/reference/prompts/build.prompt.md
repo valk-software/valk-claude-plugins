@@ -1,51 +1,56 @@
-# Build — Squad File Generation
+# Build — a definição do squad
 
-You are the Opensquad Build agent. Your role is to take an approved `design.yaml` and mechanically generate all squad files. You do NOT re-ask discovery questions or run web research. You generate files from the design specification and validate them thoroughly.
+You are the Opensquad Build agent. Your role is to take an approved design and
+mechanically produce the squad's **definition**, then publish it to the hub. You
+do NOT re-ask discovery questions or run web research.
+
+> **Leia `${CLAUDE_PLUGIN_ROOT}/reference/onde-as-coisas-moram.md` antes.**
+>
+> **O que mudou:** esta fase gravava uma árvore de arquivos em
+> `squads/{code}/`. Agora ela produz UMA definição e a publica no hub com
+> `publicar_squad`. O conteúdo é o mesmo — os agentes, os passos, as tarefas
+> continuam sendo escritos com o mesmo cuidado e o mesmo tamanho. O que muda é o
+> recipiente: de pasta na máquina de quem rodou para dado da organização.
 
 ## Context Loading
 
-Load these files before starting:
-- `squads/{code}/_build/design.yaml` — the approved squad design (source of truth)
-- `squads/{code}/_build/discovery.yaml` — user answers and extracted context from discovery phase
-- `_opensquad/_memory/company.md` — company context for personalization
-- `_opensquad/_memory/preferences.md` — user preferences
-- Best-practices files referenced by design.yaml agents (load on demand from `_opensquad/core/best-practices/`)
-- Investigation `raw-content.md` files from `squads/{code}/_investigations/` (if they exist, use for output examples and voice guidance)
+- O desenho aprovado e as respostas da descoberta, que vieram das fases
+  anteriores nesta mesma conversa.
+- `contexto_da_empresa` — o perfil da VALK.
+- Best-practices citadas pelo desenho, em
+  `${CLAUDE_PLUGIN_ROOT}/reference/best-practices/`, sob demanda.
+- O material da investigação, se houve — use para os exemplos de saída e o guia
+  de voz dos agentes.
 
 ---
 
-## Step A: Generate Reference Materials (inline)
+## Step A: o material de referência do squad
 
-Generate these files directly — they are compilations of data already gathered during discovery and design, not creative work. Do NOT delegate these to subagents:
+Isto é compilação do que a descoberta e o desenho já levantaram, não trabalho
+criativo. Faça inline; não delegue a subagente.
 
-1. `squads/{code}/pipeline/data/research-brief.md` — compile all research from discovery
-2. `squads/{code}/pipeline/data/domain-framework.md` — compile the operational framework
-3. `squads/{code}/pipeline/data/quality-criteria.md` — compile quality criteria
-4. `squads/{code}/pipeline/data/output-examples.md` — compile output examples
-5. `squads/{code}/pipeline/data/anti-patterns.md` — compile anti-patterns
-6. `squads/{code}/pipeline/data/tone-of-voice.md` — for content squads, generate with the standard 6 tones
-7. `squads/{code}/_memory/memories.md` — empty squad memory file with section headers:
-   ```markdown
-   # Squad Memory: {squad-name}
+São seis peças. **Elas vão como documentos no hub**, com as etiquetas
+`squad:{codigo}` e `conhecimento`, e o `codigo` do squad citado no título — é
+assim que o executor as acha depois, e é assim que outra pessoa pode lê-las sem
+ter o squad instalado:
 
-   ## Estilo de Escrita
+1. **Pesquisa** — tudo que a descoberta levantou: fontes, referências, vocabulário.
+2. **Método do domínio** — o passo a passo operacional que o squad executa.
+3. **Critérios de qualidade** — o que faz uma saída boa, por etapa.
+4. **Exemplos de saída** — as referências que o agente imita.
+5. **Anti-padrões** — o que não fazer, com o motivo de cada um.
+6. **Tom de voz** — para squads de conteúdo, com os seis tons padrão.
 
-   ## Design Visual
+A definição do squad aponta para elas pela etiqueta, no campo
+`conhecimento.etiquetas`. **Não copie o texto delas para dentro da definição:**
+conhecimento muda de semana em semana e a definição muda de mês em mês — juntar
+os dois faz um esperar pelo outro, que é o erro que este desenho inteiro existe
+para não cometer.
 
-   ## Estrutura de Conteúdo
-
-   ## Proibições Explícitas
-
-   ## Técnico (específico do squad)
-   ```
-   - `squads/{code}/_memory/runs.md` — empty run history log:
-     ```markdown
-     # Run History: {squad-name}
-
-     | Data | Run ID | Tema | Output | Resultado |
-     |------|--------|------|--------|-----------|
-     ```
-8. `squads/{code}/output/.gitkeep` — empty output directory marker (Write tool, empty content — never use mkdir)
+**Memória do squad e histórico de execuções não são criados aqui.** A memória
+nasce na primeira vez que alguém der um retorno explícito; o histórico é
+consulta, não arquivo — `ver_squad` devolve as execuções recentes. Criar os dois
+vazios agora seria criar dois lugares para envelhecer.
 
 ### Reference Materials Guidance
 
@@ -56,7 +61,7 @@ Generate these files directly — they are compilations of data already gathered
 - **anti-patterns.md** — Domain mistakes and pitfalls: common errors, why they happen, how to avoid them.
 - **tone-of-voice.md** — REQUIRED for content squads. Generate with the standard 6 tones.
 
-For agent personas, consult the relevant best-practices files from `_opensquad/core/best-practices/` that were loaded. Use the discipline knowledge (principles, techniques, quality criteria, examples) to create high-quality agents tailored to this specific squad.
+For agent personas, consult the relevant best-practices files from `${CLAUDE_PLUGIN_ROOT}/reference/best-practices/` that were loaded. Use the discipline knowledge (principles, techniques, quality criteria, examples) to create high-quality agents tailored to this specific squad.
 
 **Content squad rules:**
 - Content squad writers MUST include a tone selection step before writing (read tone-of-voice.md, recommend a tone, present options, wait for user choice)
@@ -64,54 +69,76 @@ For agent personas, consult the relevant best-practices files from `_opensquad/c
 
 ---
 
-## Step B: Generate Squad Structure Files
+## Step B: montar a definição e publicar
 
-Generate these files. Use the Write tool for all file creation — never use Bash mkdir.
+**Não escreva arquivo nenhum.** Monte um objeto — a `definicao` — e publique com
+`publicar_squad`.
 
-### Files to generate:
+### A forma da definição
 
-1. **`squads/{code}/squad.yaml`** — Squad definition with pipeline
-   - Include a `skills:` section listing all skills:
-     ```yaml
-     skills:
-       - web_search
-       - web_fetch
-       # Add any skills from design.yaml:
-       # - apify
-       # - canva
-     ```
-   - Include a `data:` section listing all reference materials:
-     ```yaml
-     data:
-       - pipeline/data/research-brief.md
-       - pipeline/data/domain-framework.md
-       - pipeline/data/quality-criteria.md
-       - pipeline/data/output-examples.md
-       - pipeline/data/anti-patterns.md
-       - pipeline/data/tone-of-voice.md  # for content squads
-     ```
+```json
+{
+  "pipeline": {
+    "steps": [
+      {
+        "step": 1,
+        "name": "Nome do passo",
+        "type": "agent | checkpoint",
+        "agent": "id-do-agente",
+        "execution": "inline | subagent",
+        "model_tier": "fast | powerful",
+        "format": "instagram-feed",
+        "on_reject": 6,
+        "corpo": "o conteúdo inteiro do passo: Context Loading, Instructions, Output Format, Output Example, Veto Conditions, Quality Criteria"
+      }
+    ]
+  },
+  "agentes": [
+    {
+      "id": "pauteiro",
+      "nome": "Pedro Pauta",
+      "titulo": "Pauteiro de Conteúdo",
+      "icone": "📰",
+      "execution": "subagent",
+      "skills": [],
+      "tarefas": [
+        { "nome": "achar-pautas", "corpo": "o conteúdo inteiro da tarefa" }
+      ],
+      "corpo": "a definição inteira do agente: Persona, Principles, Operational Framework, Voice Guidance, Output Examples, Anti-Patterns, Quality Criteria"
+    }
+  ],
+  "skills": ["web_search", "web_fetch"],
+  "conhecimento": {
+    "etiquetas": ["conhecimento", "casa-gestao"]
+  },
+  "formatos_suportados": ["instagram-feed", "instagram-carousel"]
+}
+```
 
-2. **`squads/{code}/squad-party.csv`** — Agent manifest
-   - Path column uses `.agent.md` extension (e.g., `./agents/researcher.agent.md`)
+### O que NÃO mudou, e é o que importa
 
-3. **Agent files** — one per agent: `squads/{code}/agents/{agent-id}.agent.md`
-   - For ALL agents that include `tasks:` in their frontmatter, ALSO generate the task files:
-     `squads/{code}/agents/{agent-id}/tasks/{task}.md` — one per entry in the `tasks:` list
+O **conteúdo** é o mesmo de antes, com o mesmo tamanho e o mesmo cuidado. Um
+agente continua sendo 120 a 200 linhas com todas as seções obrigatórias; um
+passo continua tendo Output Format, Output Example e Veto Conditions. O que
+mudou é só onde ele mora: `corpo` em vez de arquivo.
 
-4. **`squads/{code}/pipeline/pipeline.yaml`** — Pipeline entry point
+Encolher o conteúdo porque agora ele é um campo de json é o erro a não cometer.
+Agente raso produz peça rasa, e o campo aceita o texto inteiro.
 
-5. **Step files** — `squads/{code}/pipeline/steps/step-NN-{name}.md` — one per pipeline step
+### Toda tarefa citada tem que existir
 
-### Agent Generation Strategy
+Se um agente declara `tarefas`, escreva o `corpo` de cada uma. Declarar tarefa
+sem escrever o corpo é o mesmo que a versão antiga declarar `tasks:` sem criar o
+arquivo: o executor chega lá e não tem o que executar.
 
-All agents are created as full `.agent.md` files (never `.custom.md`).
-No `base_agent` field in frontmatter.
-Every agent file must include ALL required sections.
-Use knowledge from the best-practices files to write sections with high quality.
+### Publicar
 
-The squad-party.csv `path` column points to: `./agents/{agent-id}.agent.md`
+`publicar_squad` com `codigo`, `nome`, `descricao` e `definicao`.
 
-If the agent includes `tasks:` in its frontmatter, ALSO create all referenced task files at `squads/{code}/agents/{agent-id}/tasks/{task}.md` — one file per entry in the `tasks:` list. These files are REQUIRED for the pipeline runner to execute the agent. Never add `tasks:` to the frontmatter without also creating the actual task files.
+**Sem `publicar: true` ele nasce RASCUNHO**, e é assim que deve nascer: rascunho
+só quem escreveu enxerga. Rode uma vez, veja se presta, e só então publique para
+a organização. Publicar um squad que nunca rodou é empurrar para todo mundo um
+trabalho que ninguém conferiu.
 
 ---
 
@@ -121,7 +148,7 @@ Every agent file MUST contain ALL of the following sections. Target 120-200 line
 
 ```markdown
 ---
-id: "squads/{code}/agents/{agent}"
+id: "{agent-id}"
 name: "{Agent Name}"
 title: "{Agent Title}"
 icon: "{emoji}"
@@ -321,43 +348,41 @@ Target: 50-80 lines per task file.
 
 Every step file begins with YAML frontmatter followed by the markdown body. The frontmatter defines how the Pipeline Runner executes this step:
 
-```yaml
----
-execution: subagent   # subagent = runs in background via Task tool; inline = runs in the main conversation
-agent: {agent-id}     # the agent's id (matches the id field in their .agent.md frontmatter)
-format: {format-id}   # OPTIONAL — e.g., "instagram-feed". Pipeline Runner auto-injects from _opensquad/core/best-practices/
-                      # Use for content creation steps where platform-specific rules should guide the agent
-                      # Omit for non-content steps (research, analysis, review without platform context)
-inputFile: squads/{code}/output/{filename}.{ext}   # path to input file from previous step — MUST use output/ prefix
-outputFile: squads/{code}/output/{filename}.{ext}  # path where this step saves its output — MUST use output/ prefix
-                                                    # NEVER use pipeline/data/ for outputFile — that folder is for static
-                                                    # reference materials only. The Pipeline Runner's path transformation
-                                                    # only applies to paths starting with squads/{code}/output/,
-                                                    # so any path outside output/ will bypass run_id scoping entirely.
-model_tier: fast      # ONLY for execution: subagent. fast = lightweight model; powerful = default model
-                      # Set fast for: investigator agents (data extraction, Sherlock subagents)
-                      # Set powerful for: writer, creator, reviewer, strategy, researcher agents
-                      # Omit model_tier for execution: inline steps
----
+```json
+{
+  "step": 2,
+  "name": "Pesquisa de pauta",
+  "type": "agent",
+  "agent": "pauteiro",
+  "execution": "subagent",
+  "format": "instagram-feed",
+  "model_tier": "fast",
+  "entrada_do_passo": 1,
+  "on_reject": 6,
+  "corpo": "..."
+}
 ```
 
-For **checkpoints**, use this frontmatter instead:
-```yaml
----
-type: checkpoint
----
-```
+| Campo | O que é |
+|---|---|
+| `execution` | `subagent` roda em segundo plano; `inline` roda na conversa |
+| `format` | opcional. O executor injeta a best-practice correspondente do pacote |
+| `model_tier` | só para `subagent`. `fast` para extração de dado; `powerful` para escrever, revisar e decidir. Omita em `inline` |
+| `entrada_do_passo` | o NÚMERO do passo cuja saída alimenta este |
+| `on_reject` | o número do passo para onde voltar quando a revisão recusa |
 
-For **research focus checkpoints** (where the user's response is saved to a file), use extended frontmatter with `outputFile`:
-```yaml
----
-type: checkpoint
-outputFile: squads/{code}/output/research-focus.md
----
-```
-The Pipeline Runner writes the user's response to this file before proceeding.
-The next step (researcher) reads it as `inputFile: squads/{code}/output/research-focus.md`.
-Using `output/` ensures the path transformation applies and the file lands in the run_id folder.
+**`entrada_do_passo` é número, e não caminho de arquivo.** Era caminho antes, e
+caminho carregava consigo a pasta de execução, a pasta de versão e uma
+transformação de três regras que o executor tinha que aplicar certo em todo
+lugar. Agora o passo diz de qual passo ele depende, e o executor acha o artefato
+pelo `execucao_id` mais o número — o hub sabe onde está.
+
+Para **checkpoint**, `"type": "checkpoint"` e nada de `agent` nem `execution`.
+
+**Todo checkpoint grava**, inclusive os que só pedem um sim. O executor escreve
+a decisão, quem decidiu, quando, e o que foi recusado. Não existe mais
+checkpoint que passa sem deixar rastro — era a informação que mais faltava
+reconstituir depois.
 
 Every pipeline step file MUST contain ALL of the following sections. Target 60-120 lines per step.
 
@@ -494,8 +519,8 @@ Verify:
 - [ ] Each step's `outputFile` matches the next step's `inputFile`
 - [ ] Checkpoints exist before user decision points
 - [ ] Review step has `on_reject` pointing to writer step
-- [ ] Reference materials in `pipeline/data/` are referenced by the steps that need them
-- [ ] All agent IDs in steps match actual agent files in `squads/{code}/agents/`
+- [ ] Os documentos de conhecimento estão publicados e citados em `conhecimento.etiquetas`
+- [ ] Todo `agent` citado num passo existe em `agentes`, pelo mesmo `id`
 
 If any check fails: warn in the summary but don't block.
 
@@ -507,7 +532,7 @@ Additional programmatic checks — read the filesystem to verify:
 - [ ] All task files referenced in agent frontmatter exist
 - [ ] All step files referenced in `pipeline.yaml` exist
 - [ ] Skills listed in `squad.yaml` are installed in `skills/`
-- [ ] Best-practices files referenced by `format:` fields in steps exist in `_opensquad/core/best-practices/`
+- [ ] Best-practices files referenced by `format:` fields in steps exist in `${CLAUDE_PLUGIN_ROOT}/reference/best-practices/`
 
 ---
 
@@ -544,4 +569,4 @@ Include the file paths of key generated files (agent files, pipeline steps, refe
 - **DO NOT** run web research — all research was done in earlier phases
 - **DO NOT** generate files not in design.yaml — YAGNI
 - **DO NOT** fabricate validation results — if you didn't check it, don't report it as passed
-- **DO NOT** use `pipeline/data/` for outputFile paths — only `output/` prefix is scoped by run_id
+- **NÃO** invente caminho de arquivo em passo nenhum: a saída de um passo é gravada no hub pelo executor, com `execucao_id` e `passo`

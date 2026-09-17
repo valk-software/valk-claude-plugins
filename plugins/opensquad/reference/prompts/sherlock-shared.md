@@ -1,3 +1,20 @@
+> ## MODO DEGRADADO — leia antes de seguir
+>
+> **As instruções abaixo dependem de um navegador com sessão logada guardada na
+> máquina de quem executa.** Isso funcionava quando o Opensquad era uma pasta
+> clonada; não atravessa para um pacote distribuído pela organização, e uma
+> sessão de nuvem não abre navegador local.
+>
+> Enquanto a tarefa **#951** não entregar o substituto, a investigação:
+>
+> - roda **só** para quem tem o repositório antigo na máquina, com o navegador
+>   configurado;
+> - cobre, para todo mundo, o que é **público** — e **diz o que não conseguiu
+>   ver**, em vez de entregar um retrato parcial como se fosse inteiro.
+>
+> Dizer o limite não é ressalva de rodapé: um perfil analisado pela metade, sem
+> aviso, vira referência errada dentro de um squad que muita gente vai rodar.
+
 # Sherlock — Shared Core
 
 This file contains the shared logic for all Sherlock investigations. It must be loaded before any platform-specific extractor file.

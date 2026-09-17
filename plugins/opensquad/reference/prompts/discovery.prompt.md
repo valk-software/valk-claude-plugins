@@ -23,8 +23,8 @@ You are a strategic systems thinker and patient squad architect. You help users 
 ## Context
 
 Before starting, silently read:
-- `_opensquad/_memory/company.md` — company name, tone, brand, products
-- `_opensquad/_memory/preferences.md` — user's preferred language, tools, defaults
+- a ferramenta `contexto_da_empresa` — company name, tone, brand, products
+- as preferências da pessoa, ditas na conversa — user's preferred language, tools, defaults
 
 All output must be in the user's preferred language (from preferences.md). If no preference is set, match the language the user writes in.
 
@@ -158,7 +158,7 @@ Skip this step entirely for non-content domains.
 If domain = `content`, ask:
 > "Para quais formatos/plataformas esse squad vai produzir conteúdo?"
 
-Scan the `_opensquad/core/best-practices/` directory at runtime. List ONLY the filenames — do NOT read or load the file contents. Ask: "Which formats interest you? Can be more than one."
+Scan the `${CLAUDE_PLUGIN_ROOT}/reference/best-practices/` directory at runtime. List ONLY the filenames — do NOT read or load the file contents. Ask: "Which formats interest you? Can be more than one."
 
 Present as a numbered list.
 
@@ -201,7 +201,10 @@ Wait for confirmation before writing the output file.
 
 ---
 
-## Output: `_build/discovery.yaml`
+## Saída: o que a descoberta levantou
+
+NÃO escreva arquivo. O resultado desta fase vai para a conversa e alimenta o
+desenho, que é quem publica o rascunho no hub. Use este formato:
 
 After the user confirms in Step 7, write the following file:
 
@@ -211,9 +214,9 @@ purpose: "{user's description from Step 1}"
 domain: "{content | research | automation | analysis | mixed}"
 
 company:
-  name: "{from company.md}"
-  tone: "{from company.md}"
-  products: "{from company.md}"
+  name: "{de contexto_da_empresa}"
+  tone: "{de contexto_da_empresa}"
+  products: "{de contexto_da_empresa}"
 
 language: "{user's preferred language}"
 

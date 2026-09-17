@@ -239,7 +239,7 @@ This operation is called BEFORE pipeline execution starts. All skills must resol
 before the pipeline begins (fail fast).
 
 1. **Read the squad's skill list**:
-   Read `squads/{squad}/squad.yaml` → `skills` section
+   `ver_squad` → o campo `skills` da definição
 
 2. **Separate native skills from installed skills**:
    - Native skills: `web_search`, `web_fetch` — these are built-in and always available
