@@ -33,8 +33,44 @@ Enquanto a distribuição por organização não estiver ligada:
 /plugin install opensquad@valk
 ```
 
-Depois de ligada em *Organization settings > Plugins*, ele chega sozinho em
-quem é da VALK.
+Depois de ligada, ele chega sozinho em quem é da VALK.
+
+## Como ligar a distribuição para a organização
+
+Ato de tela, feito uma vez, por quem é **Owner** da organização no Claude.
+
+1. Abrir **Organization settings > Plugins**.
+2. Apontar para este repositório: `valk-software/valk-claude-plugins`.
+3. Deixar o `opensquad` como **instalado por padrão**, e **não** como
+   obrigatório.
+4. Esperar a sincronização. Ela dispara quando uma versão nova entra na `main` e
+   leva **até 30 minutos** para chegar em todo mundo.
+
+### Por que instalado por padrão e não obrigatório
+
+Obrigatório tira da pessoa a saída quando alguma coisa quebra. Um pacote que
+chega ligado e pode ser desligado é um pacote que alguém consegue contornar às
+oito da noite de uma sexta; um obrigatório é um chamado para o Owner. Depois de
+algumas semanas rodando sem susto, a conversa pode ser outra.
+
+### O que este repositório já garante
+
+A distribuição por organização impõe restrições que custam retrabalho quando
+descobertas no fim. As três estão atendidas, e ficam escritas aqui para
+continuarem atendidas:
+
+| Exigência | Como está aqui |
+|---|---|
+| Plugin privado usa caminho **relativo** dentro do repositório do marketplace | `"source": "./plugins/opensquad"` |
+| Pacote **não** pode ter pasta de executáveis no topo | não existe `bin/`; o que houver de script vai para `scripts/` |
+| Atualização só chega quando a **versão muda** | `version` declarada nos dois manifestos, e `claude plugin tag` recusa publicar se eles discordarem |
+
+### O conector vem junto
+
+Não é preciso distribuir o conector do hub separadamente nem pedir para ninguém
+conectar à mão: o plugin carrega o próprio `.mcp.json` apontando para a porta
+enxuta. Instalou o plugin, tem o conector — ele pede autorização na primeira vez
+e pronto.
 
 ## O conector
 

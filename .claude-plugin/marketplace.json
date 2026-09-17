@@ -14,14 +14,15 @@
       "source": "./plugins/opensquad",
       "displayName": "Opensquad",
       "description": "O motor de squads de agentes da VALK. Cria e roda squads; as definições vivem no Valk Hub, não no pacote.",
-      "version": "2.1.0",
+      "version": "2.1.1",
       "author": {
         "name": "VALK",
         "url": "https://valkbr.com"
       },
       "repository": "https://github.com/valk-software/valk-claude-plugins",
       "keywords": ["squads", "agentes", "conteudo", "valk"],
-      "category": "productivity"
+      "category": "productivity",
+      "defaultEnabled": true
     }
   ]
 }
