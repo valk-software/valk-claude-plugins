@@ -55,6 +55,9 @@ Pelo conector **valk-hub-squads**.
 | Artefato de texto de um passo | `escrever_documento` com `execucao_id` e `passo` |
 | Artefato que não é texto | `gravar_arquivo_da_execucao` com `execucao_id` e `passo` |
 | Corrigir um passo | `corrigir_documento` — **nunca** um documento novo |
+| CRIAR uma imagem | `gerar_imagem` (ela já grava no passo, sem `gravar_arquivo` depois) |
+| Publicar um carrossel | `publicar_no_instagram`, e sem `confirmar: true` é só preview |
+| Estudar um perfil de referência | `investigar_perfil`, e LEIA a `cobertura` que vem junto |
 | Publicar ou corrigir um squad | `publicar_squad` |
 | Trabalho para uma pessoa | `criar_tarefa` |
 | Fechar a execução | `registrar_execucao` **com** `execucao_id`, tokens e custo |

@@ -81,16 +81,36 @@ Quando a pessoa digita `/opensquad` ou pede o menu, use AskUserQuestion:
 
 ### Fase 2: Investigação (opcional)
 
-Se a descoberta pedir investigação de perfis de referência, leia
-`${CLAUDE_PLUGIN_ROOT}/reference/prompts/sherlock-shared.md` mais o extrator da
-plataforma (`sherlock-instagram.md`, `sherlock-youtube.md`, `sherlock-twitter.md`,
-`sherlock-linkedin.md`).
+Se a descoberta pedir investigação de perfis de referência, use
+**`investigar_perfil`**, do conector. Ela coleta os posts públicos e, com
+`ler_imagens: true`, **transcreve o texto escrito dentro dos slides** — que é o
+que o método antigo alcançava abrindo o carrossel e avançando seta por seta.
 
-> **Modo degradado, dito em voz alta.** A investigação original rodava um
-> navegador com sessão logada na máquina de quem executava, e isso não atravessa
-> para um pacote distribuído. Enquanto a tarefa #951 não entregar o substituto,
-> a investigação cobre o que é público e **diz o que não conseguiu ver**, em vez
-> de entregar um retrato parcial como se fosse inteiro.
+```
+investigar_perfil({ plataforma: "instagram", perfil: "@alguem",
+                    quantos_posts: 3, ler_imagens: true })
+```
+
+**Leia a `cobertura` que vem na resposta antes de concluir qualquer coisa.** Ela
+diz o que aquela coleta alcança e o que não alcança, e a diferença muda a
+leitura: "zero salvamentos" ali quer dizer *não dá para saber*, não *ninguém
+salvou*.
+
+Duas coisas que precisam ser ditas quando você usar isto:
+
+- **A transcrição dos slides é aproximada.** Um modelo lendo um PNG erra em
+  fonte fina, texto sobre foto e número comprido. Se for citar um número que
+  saiu de um slide, confira na imagem antes.
+- **Cada chamada custa em duas contas** — a raspagem cobra por item, e a leitura
+  das imagens cobra no painel de IA. Peça poucos posts, e não repita a mesma
+  coleta para "conferir".
+
+> **O que continua fora de alcance.** Perfil privado, salvamentos,
+> compartilhamentos e stories. Aquilo dependia de uma sessão logada, que por
+> definição é de uma pessoa e de uma máquina, e não atravessa para um pacote
+> distribuído. Os arquivos `sherlock-*.md` descrevem o método antigo, de
+> navegador: eles valem como referência do que se extraía, e não como
+> instrução do que fazer hoje.
 
 ### Fase 3: Desenho
 
@@ -133,11 +153,36 @@ ninguém conferiu.
    `${CLAUDE_PLUGIN_ROOT}/reference/runner.pipeline.md`.
 6. Execute passo a passo. **Cada passo grava o que saiu:**
    - texto → `escrever_documento`, com `execucao_id` e `passo`
-   - imagem, peça pronta, PDF → `gravar_arquivo_da_execucao`, com os mesmos dois
+   - peça pronta, PDF, export → `gravar_arquivo_da_execucao`, com os mesmos dois
+   - **criar** uma imagem → `gerar_imagem`. Ela gera e **já grava no passo**, então
+     não chame `gravar_arquivo` depois. A chave é do hub, e o gasto entra no
+     painel de IA
    - um passo voltou atrás → `corrigir_documento`, **nunca** um documento novo
      sobre a mesma coisa
-7. `registrar_execucao` **com** o `execucao_id`, no fim, com tokens, custo e o
+7. Se o squad **publica**: `ver_conta_do_instagram` antes de montar a peça, e
+   `publicar_no_instagram` no fim. Ver abaixo — publicar é diferente de tudo.
+8. `registrar_execucao` **com** o `execucao_id`, no fim, com tokens, custo e o
    que sobrou.
+
+### Publicar é o único ato que não volta
+
+`publicar_no_instagram` **sem `confirmar: true` devolve o preview e não publica
+nada.** Mostre esse preview a uma pessoa. Só chame de novo com `confirmar`
+depois de ela aprovar.
+
+Se não houver ninguém para aprovar, **pare ali** e grave que a publicação não
+aconteceu, com o motivo. Isso é desfecho legítimo, não falha — e é exatamente o
+que a prova de 16/09/2026 fez no passo 11.
+
+O primeiro id da lista é a **capa**: a ordem que você mandar é a ordem dos
+slides.
+
+### Gerar imagem custa dinheiro de verdade
+
+Antes de gerar, confira se já não existe uma peça que sirva. Um carrossel de
+sete imagens custa o mesmo que uma conferência de contrato inteira, e "deixa eu
+gerar umas variações para testar" é como uma conta de centavos vira uma conta de
+dezenas de reais.
 
 ### O passo é inteiro, e checkpoint também é passo
 
@@ -203,6 +248,10 @@ EMPRESA
 FERRAMENTAS
   ref-analyzer                manda um link de vídeo e eu destilo a receita
                               visual (paleta, corte, tipografia, gancho)
+  investigar_perfil           lê um perfil de referência e transcreve o
+                              texto dos slides. Vem com o que ela NÃO vê
+  gerar_imagem                cria imagem e já grava no passo
+  publicar_no_instagram       publica carrossel. Pede confirmação
 
 ONDE AS COISAS MORAM
   O motor está neste pacote. Os squads e o que eles produzem estão no
