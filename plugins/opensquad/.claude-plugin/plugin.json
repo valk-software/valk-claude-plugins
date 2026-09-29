@@ -1,7 +1,7 @@
 {
   "name": "opensquad",
   "displayName": "Opensquad",
-  "version": "2.4.0",
+  "version": "2.5.0",
   "description": "O motor de squads de agentes da VALK. Cria e roda squads; as definições vivem no Valk Hub, não neste pacote.",
   "author": {
     "name": "VALK",
