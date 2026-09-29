@@ -89,6 +89,25 @@ Cada tarefa tem as próprias condições de veto, e elas valem como as do passo.
 
 ## Para cada passo
 
+### 0. Diga que começou
+
+`marcar_passo` com o `execucao_id`, o número do `passo` e `estado: "comecou"`,
+**antes** de qualquer trabalho do passo. Se quiser, `nota` com uma frase do que
+vai acontecer ("lendo o hub do cliente").
+
+É isso que faz o passo aparecer ao vivo no hub, no escritório dos agentes. O
+documento do passo NÃO serve para isso: ele costuma ser gravado em rajada, e já
+houve cinco passos "terminando" no mesmo minuto. A hora e o agente quem decide é
+o hub, pela definição do squad; você só diz o passo e o estado.
+
+Quem marca é o executor, e não o subagente: no modo `subagent`, marque
+`comecou` antes de despachar e `terminou` quando ele devolver.
+
+Se `marcar_passo` falhar, **siga o run** e diga uma vez que o passo não vai
+aparecer ao vivo. Sinal que faltou empobrece a tela; parar o run por ele custa
+mais do que resolve. (Gravar o artefato é outra coisa: essa trava continua
+binária, abaixo.)
+
 ### 1. Confira a entrada
 
 Se o passo declara que depende da saída de um passo anterior, confirme que ela
@@ -157,12 +176,22 @@ correção específica ao agente, e **corrija o documento com
 Isto é uma malha de qualidade ANTES de a revisora ver, e existe para gastar
 ciclo de revisão com o que importa.
 
+### 6. Diga que terminou
+
+`marcar_passo` com `estado: "terminou"` depois de gravar e de passar pelos
+vetos. Se o passo não deu certo (abortado, pulado por falta de entrada, veto
+esgotado), `estado: "erro"`, com a razão em `nota`.
+
 ---
 
 ## Checkpoint — e o que mudou aqui
 
 Apresente a mensagem, apresente as opções quando houver, **e espere**. Nunca
 passe de um checkpoint sem resposta da pessoa.
+
+Antes de perguntar, `marcar_passo` com `estado: "aguardando_aprovacao"`. É o
+momento que mais importa na tela: o run parado, esperando uma pessoa. Depois da
+resposta, e depois de gravar o documento do checkpoint, `estado: "terminou"`.
 
 **Agora o checkpoint GRAVA.** Antes ele não deixava rastro nenhum: quem aprovou,
 quando, e o que foi recusado no caminho simplesmente sumia — e numa execução de

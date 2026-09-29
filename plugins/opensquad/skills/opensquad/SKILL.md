@@ -156,7 +156,13 @@ ninguém conferiu.
    o id.
 5. Leia as instruções do executor em
    `${CLAUDE_PLUGIN_ROOT}/reference/runner.pipeline.md`.
-6. Execute passo a passo. **Cada passo grava o que saiu:**
+6. Execute passo a passo. **Cada passo avisa quando começa e quando termina:**
+   `marcar_passo` com `comecou` antes do trabalho do passo, e com `terminou` (ou
+   `erro`) quando ele acaba. No checkpoint, `aguardando_aprovacao` antes de
+   perguntar à pessoa, e `terminou` depois da resposta. É o que faz o passo
+   aparecer ao vivo no hub: o documento é gravado em rajada, e o horário dele
+   não diz quando o passo aconteceu. A hora e o agente quem decide é o hub.
+   **E cada passo grava o que saiu:**
    - texto → `escrever_documento`, com `execucao_id` e `passo`
    - peça pronta, PDF, export → `gravar_arquivo_da_execucao`, com os mesmos dois
    - **criar** uma imagem → `gerar_imagem`. Ela gera e **já grava no passo**, então
