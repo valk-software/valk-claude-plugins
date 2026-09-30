@@ -1,0 +1,30 @@
+{
+  "description": "Lembretes do fluxo de codificação: no início da sessão e quando um dos três subagentes do plugin volta. Só adicionam contexto, não bloqueiam nada.",
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node",
+            "args": ["${CLAUDE_PLUGIN_ROOT}/scripts/session-start.js"],
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Agent",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node",
+            "args": ["${CLAUDE_PLUGIN_ROOT}/scripts/agent-review.js"],
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}
