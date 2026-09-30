@@ -1,0 +1,14 @@
+{
+  "name": "fluxo-codificacao",
+  "displayName": "Fluxo de codificação",
+  "version": "1.0.0",
+  "description": "O jeito VALK de programar com agentes: a sessão principal planeja e revisa, três subagentes fazem o trabalho braçal.",
+  "author": {
+    "name": "VALK",
+    "url": "https://valkbr.com"
+  },
+  "homepage": "https://hub.valkbr.com",
+  "repository": "https://github.com/valk-software/valk-claude-plugins",
+  "keywords": ["codificacao", "subagentes", "fluxo", "valk"],
+  "license": "UNLICENSED"
+}
