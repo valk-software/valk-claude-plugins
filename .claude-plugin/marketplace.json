@@ -52,7 +52,7 @@
       "repository": "https://github.com/valk-software/valk-claude-plugins",
       "keywords": ["escritorio", "claude-code", "hub", "valk"],
       "category": "productivity",
-      "defaultEnabled": false
+      "defaultEnabled": true
     }
   ]
 }

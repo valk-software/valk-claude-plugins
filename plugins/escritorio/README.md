@@ -7,12 +7,17 @@ permissão nem manda comando para a máquina de ninguém.
 
 ## Como instalar
 
+O plugin vem ligado para todo o time da VALK pela sincronização da organização, mas
+fica quieto até ganhar uma chave. Para começar a aparecer no escritório, rode `/plugin`,
+abra o `escritorio` e preencha a **Chave do escritório**. Fora da organização, instale
+na mão:
+
 ```
 /plugin marketplace add valk-software/valk-claude-plugins
 /plugin install escritorio@valk
 ```
 
-O Claude Code vai pedir a **Chave do escritório**. Gere uma no Valk Hub, em
+Na instalação manual, o Claude Code pede a **Chave do escritório** na hora. Gere uma no Valk Hub, em
 **Configurações › Meu Claude Code**, e cole. Ela aparece uma única vez; tem o
 formato `valk_coletor_...`, é de um computador só e vence com 30 dias sem uso.
 O campo "Endereço do Valk Hub" já vem com `https://hub.valkbr.com`.
