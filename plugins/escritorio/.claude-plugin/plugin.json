@@ -1,0 +1,30 @@
+{
+  "name": "escritorio",
+  "displayName": "Escritório dos agentes",
+  "version": "1.0.0",
+  "description": "Mostra no escritório do Valk Hub o que o seu Claude Code está fazendo: só o estado e rótulos limpos, nunca prompt, comando, arquivo ou saída.",
+  "author": {
+    "name": "VALK",
+    "url": "https://valkbr.com"
+  },
+  "homepage": "https://hub.valkbr.com",
+  "repository": "https://github.com/valk-software/valk-claude-plugins",
+  "keywords": ["escritorio", "claude-code", "hub", "valk"],
+  "license": "UNLICENSED",
+  "userConfig": {
+    "chave": {
+      "type": "string",
+      "title": "Chave do escritório",
+      "description": "Chave do coletor do seu computador. Pegue no Valk Hub, em Configurações › Meu Claude Code. Sem chave, o plugin não envia nada.",
+      "sensitive": true,
+      "required": false
+    },
+    "hub_url": {
+      "type": "string",
+      "title": "Endereço do Valk Hub",
+      "description": "Endereço do hub que recebe os eventos. Deixe o padrão, a menos que a VALK diga o contrário.",
+      "default": "https://hub.valkbr.com",
+      "required": false
+    }
+  }
+}
