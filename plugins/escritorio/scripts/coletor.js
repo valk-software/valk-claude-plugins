@@ -30,6 +30,8 @@ const EVENTOS = {
   SessionEnd: "fim"
 };
 
+const NOTIFICACOES = ["permission_prompt", "elicitation_dialog", "agent_needs_input"];
+
 // ---------------------------------------------------------------- texto
 
 function limpar(texto) {
@@ -308,12 +310,18 @@ function montarCorpo(nomeDoHook, entrada, opcoes) {
       corpo.atividade = { tipo: "prompt", rotulo: "Recebeu um pedido" };
       break;
     case "PreToolUse":
+      if (limpar(e.tool_name) === "AskUserQuestion") {
+        // Uma pergunta ao usuário é a mão levantada, não só uma ferramenta.
+        corpo.evento = "precisa_de_voce";
+        corpo.atividade = { tipo: "ask", rotulo: "Fazendo uma pergunta" };
+        break;
+      }
       corpo.atividade = sanitizar(e.tool_name, e.tool_input);
       if (agente) corpo.subagente = agente;
       break;
     case "Notification": {
       const t = limpar(e.notification_type);
-      if (t && t !== "permission_prompt" && t !== "elicitation_dialog") return null;
+      if (t && !NOTIFICACOES.includes(t)) return null;
       corpo.atividade = { tipo: "ask", rotulo: "Precisa de você" };
       break;
     }
@@ -367,6 +375,32 @@ function throttled(env, corpo, agora) {
   return false;
 }
 
+// A "mão levantada": existe enquanto o último aviso da sessão foi precisa_de_voce.
+function arquivoDaMao(env, sessao) {
+  const h = crypto.createHash("sha1").update(sessao).digest("hex").slice(0, 16);
+  return path.join(pastaDeDados(env), "escritorio-" + h + ".mao");
+}
+
+function levantarMao(env, sessao) {
+  try {
+    const arq = arquivoDaMao(env, sessao);
+    fs.mkdirSync(path.dirname(arq), { recursive: true });
+    fs.writeFileSync(arq, "1");
+  } catch {
+    // sem estado, o próximo PreToolUse ainda devolve a sessão a "trabalhando"
+  }
+}
+
+// Abaixa a mão; true se ela estava levantada.
+function baixarMao(env, sessao) {
+  try {
+    fs.unlinkSync(arquivoDaMao(env, sessao));
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 function registrar(env, linha) {
   try {
     if (!env.CLAUDE_PLUGIN_DATA) return;
@@ -402,25 +436,48 @@ async function rodar(argv, stdin, env, fetchImpl) {
     }
 
     const hook = argv[0] || (entrada && entrada.hook_event_name);
+    const sessao = limpar(entrada && entrada.session_id).slice(0, 100);
+    const base = (limpar(env.CLAUDE_PLUGIN_OPTION_HUB_URL) || "https://hub.valkbr.com").replace(/[/]+$/, "");
+
+    async function enviar(corpo) {
+      const resp = await fetchImpl(base + "/api/escritorio/coletor", {
+        method: "POST",
+        headers: { Authorization: "Bearer " + chave, "Content-Type": "application/json" },
+        body: JSON.stringify(corpo),
+        signal: AbortSignal.timeout(corpo.evento === "fim" ? 1500 : 4000)
+      });
+      if (!resp.ok) registrar(env, corpo.evento + " -> HTTP " + resp.status);
+      return resp.ok;
+    }
+
+    if (hook === "PostToolUse") {
+      // Ferramenta terminou: se a mão estava levantada, avisa que voltou a trabalhar.
+      const retomada = sessao && baixarMao(env, sessao);
+      const execucao = montarCorpo(hook, entrada, { instante });
+      if (!retomada && !execucao) return { enviado: false, motivo: "ignorado" };
+      let ultimo = null;
+      if (retomada) {
+        // Sem atividade: o hub só move a sessão para "trabalhando".
+        const corpo = { sessao, evento: "ferramenta", instante };
+        const projeto = nomeDoProjeto(entrada.cwd || process.cwd());
+        if (projeto) corpo.projeto = cortar(projeto, 80);
+        ultimo = { enviado: await enviar(corpo), corpo };
+      }
+      if (execucao) ultimo = { enviado: await enviar(execucao), corpo: execucao };
+      return ultimo;
+    }
+
     const corpo = montarCorpo(hook, entrada, { instante });
     if (!corpo) return { enviado: false, motivo: "ignorado" };
 
+    if (["prompt", "parou", "fim"].includes(corpo.evento)) baixarMao(env, corpo.sessao);
     if (corpo.evento === "ferramenta" && throttled(env, corpo, Date.parse(instante))) {
       return { enviado: false, motivo: "throttle" };
     }
+    if (corpo.evento === "precisa_de_voce") levantarMao(env, corpo.sessao);
 
-    const base = (limpar(env.CLAUDE_PLUGIN_OPTION_HUB_URL) || "https://hub.valkbr.com").replace(/\/+$/, "");
-    const resp = await fetchImpl(base + "/api/escritorio/coletor", {
-      method: "POST",
-      headers: { Authorization: "Bearer " + chave, "Content-Type": "application/json" },
-      body: JSON.stringify(corpo),
-      signal: AbortSignal.timeout(corpo.evento === "fim" ? 1500 : 4000)
-    });
-    if (!resp.ok) {
-      registrar(env, corpo.evento + " -> HTTP " + resp.status);
-      return { enviado: false, motivo: "http_" + resp.status, corpo };
-    }
-    return { enviado: true, corpo };
+    const ok = await enviar(corpo);
+    return ok ? { enviado: true, corpo } : { enviado: false, motivo: "http", corpo };
   } catch (erro) {
     registrar(env, "erro: " + (erro && erro.message));
     return { enviado: false, motivo: "erro" };

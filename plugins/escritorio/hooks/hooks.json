@@ -52,7 +52,7 @@
     ],
     "Notification": [
       {
-        "matcher": "permission_prompt|elicitation_dialog",
+        "matcher": "permission_prompt|elicitation_dialog|agent_needs_input",
         "hooks": [
           {
             "type": "command",
@@ -117,7 +117,7 @@
     ],
     "PostToolUse": [
       {
-        "matcher": "mcp__.*registrar_execucao",
+        "matcher": "*",
         "hooks": [
           {
             "type": "command",

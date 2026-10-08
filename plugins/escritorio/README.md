@@ -28,7 +28,8 @@ Um aviso curto a cada acontecimento da sessão:
 | A sessão começa | o id da sessão, o nome do repositório e o modelo |
 | Você manda um pedido | só "Recebeu um pedido" |
 | O Claude usa uma ferramenta | um rótulo limpo, como "Lendo estado.ts", "Rodando os testes", "Git: commit" |
-| O Claude precisa de você (permissão ou pergunta) | só "Precisa de você" |
+| O Claude precisa de você (permissão, pergunta, ou sessão em segundo plano esperando resposta) | só "Precisa de você" (ou "Fazendo uma pergunta", quando é uma pergunta direta) |
+| A ferramenta que esperava você termina | só o aviso de que a sessão voltou a trabalhar, sem rótulo |
 | O Claude termina a vez | só "Terminou a vez" |
 | Um subagente começa ou termina | o id e o tipo dele (por exemplo `Explore`) |
 | Um squad abre uma execução | o id da execução, para o escritório não desenhar a mesma pessoa duas vezes |
@@ -49,7 +50,7 @@ Os rótulos são montados no seu computador, antes de enviar:
 | Skill | "Usando a skill" + nome |
 | ferramentas MCP | "servidor: ferramenta" |
 | TodoWrite, TaskCreate, TaskUpdate | "Organizando as tarefas" |
-| AskUserQuestion | "Fazendo uma pergunta" |
+| AskUserQuestion | "Fazendo uma pergunta" (e a sessão aparece como precisando de você) |
 | o resto | "Usando" + nome da ferramenta |
 
 ## O que nunca é enviado

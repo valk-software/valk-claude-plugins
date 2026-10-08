@@ -296,7 +296,7 @@ test("rodar: URL padrão, erro de rede e HTTP ruim saem calados", async () => {
   });
   assert.equal(r1.motivo, "erro");
   const r2 = await c.rodar(["Stop"], JSON.stringify({ session_id: "s" }), env, async () => ({ ok: false, status: 401 }));
-  assert.equal(r2.motivo, "http_401");
+  assert.equal(r2.motivo, "http");
   const r3 = await c.rodar(["Stop"], "isso não é json", env, async () => ({ ok: true }));
   assert.equal(r3.motivo, "entrada_invalida");
   const log = fs.readFileSync(path.join(env.CLAUDE_PLUGIN_DATA, "coletor.log"), "utf8");
@@ -333,4 +333,109 @@ test("rodar: throttle só em ferramenta repetida, e só dentro de 1,5 s", async 
   assert.equal(c.throttled(env, corpo, 1000), false);
   assert.equal(c.throttled(env, corpo, 1500), true);
   assert.equal(c.throttled(env, corpo, 2600), false);
+});
+
+// ------------------------------------------------ precisa_de_voce e a mão
+
+test("AskUserQuestion no PreToolUse vira precisa_de_voce", () => {
+  const corpo = c.montarCorpo("PreToolUse", { ...base, tool_name: "AskUserQuestion", tool_input: { questions: ["segredo?"] } }, op);
+  assert.equal(corpo.evento, "precisa_de_voce");
+  assert.deepEqual(corpo.atividade, { tipo: "ask", rotulo: "Fazendo uma pergunta" });
+  assert.ok(!JSON.stringify(corpo).includes("segredo"));
+});
+
+test("Notification agent_needs_input vira precisa_de_voce", () => {
+  const corpo = c.montarCorpo("Notification", { ...base, notification_type: "agent_needs_input" }, op);
+  assert.equal(corpo.evento, "precisa_de_voce");
+  assert.deepEqual(corpo.atividade, { tipo: "ask", rotulo: "Precisa de você" });
+});
+
+test("hooks.json: matchers de Notification e PostToolUse", () => {
+  const h = JSON.parse(fs.readFileSync(path.join(__dirname, "..", "hooks", "hooks.json"), "utf8")).hooks;
+  assert.ok(h.Notification[0].matcher.split("|").includes("agent_needs_input"));
+  assert.equal(h.PostToolUse[0].matcher, "*");
+  assert.equal(h.PostToolUse[0].hooks[0].async, true);
+});
+
+test("a mão: sobe com precisa_de_voce, desce no PostToolUse com ferramenta sem atividade", async () => {
+  const env = ambiente({ CLAUDE_PLUGIN_OPTION_CHAVE: "k" });
+  const corpos = [];
+  const f = async (_u, init) => {
+    corpos.push(JSON.parse(init.body));
+    return { ok: true };
+  };
+  const cwd = tmp();
+  const ent = (extra) => JSON.stringify({ session_id: "m1", cwd, ...extra });
+  const pos = ent({ tool_name: "Bash", tool_input: { command: "npm test" }, tool_response: "saída" });
+
+  // sem mão levantada: PostToolUse não toca na rede
+  assert.equal((await c.rodar(["PostToolUse"], pos, env, f)).motivo, "ignorado");
+  assert.equal(corpos.length, 0);
+
+  // permissão pedida: sobe a mão
+  await c.rodar(["Notification"], ent({ notification_type: "permission_prompt" }), env, f);
+  assert.equal(corpos.length, 1);
+  assert.equal(corpos[0].evento, "precisa_de_voce");
+
+  // ferramenta aprovada termina: manda ferramenta sem atividade, uma vez só
+  const r = await c.rodar(["PostToolUse"], pos, env, f);
+  assert.equal(r.enviado, true);
+  assert.equal(corpos.length, 2);
+  assert.equal(corpos[1].evento, "ferramenta");
+  assert.equal(corpos[1].sessao, "m1");
+  assert.ok(!("atividade" in corpos[1]));
+  assert.ok(!JSON.stringify(corpos[1]).includes("saída"));
+  assert.equal((await c.rodar(["PostToolUse"], pos, env, f)).motivo, "ignorado");
+  assert.equal(corpos.length, 2);
+
+  // AskUserQuestion também levanta a mão
+  await c.rodar(["PreToolUse"], ent({ tool_name: "AskUserQuestion", tool_input: {} }), env, f);
+  assert.equal(corpos[2].evento, "precisa_de_voce");
+  assert.equal((await c.rodar(["PostToolUse"], pos, env, f)).enviado, true);
+  assert.equal(corpos[3].evento, "ferramenta");
+
+  // a mão é por sessão
+  await c.rodar(["Notification"], ent({ notification_type: "permission_prompt" }), env, f);
+  const outra = JSON.stringify({ session_id: "m2", cwd, tool_name: "Read", tool_input: {} });
+  assert.equal((await c.rodar(["PostToolUse"], outra, env, f)).motivo, "ignorado");
+});
+
+test("a mão: prompt, parou e fim também abaixam", async () => {
+  const env = ambiente({ CLAUDE_PLUGIN_OPTION_CHAVE: "k" });
+  let n = 0;
+  const f = async () => {
+    n++;
+    return { ok: true };
+  };
+  for (const [hook, extra] of [["UserPromptSubmit", {}], ["Stop", {}], ["SessionEnd", {}]]) {
+    const ent = (e) => JSON.stringify({ session_id: "m3", cwd: tmp(), ...e });
+    await c.rodar(["Notification"], ent({ notification_type: "permission_prompt" }), env, f);
+    await c.rodar([hook], ent(extra), env, f);
+    const antes = n;
+    const r = await c.rodar(["PostToolUse"], ent({ tool_name: "Read", tool_input: {} }), env, f);
+    assert.equal(r.motivo, "ignorado", hook);
+    assert.equal(n, antes, hook);
+  }
+});
+
+test("a mão: PostToolUse de registrar_execucao ainda manda a execução, também com a mão levantada", async () => {
+  const env = ambiente({ CLAUDE_PLUGIN_OPTION_CHAVE: "k" });
+  const corpos = [];
+  const f = async (_u, init) => {
+    corpos.push(JSON.parse(init.body));
+    return { ok: true };
+  };
+  const pos = JSON.stringify({
+    session_id: "m4",
+    cwd: tmp(),
+    tool_name: "mcp__x__registrar_execucao",
+    tool_input: { squad: "s" },
+    tool_response: { id: UUID }
+  });
+  await c.rodar(["PostToolUse"], pos, env, f);
+  assert.deepEqual(corpos.map((x) => x.evento), ["execucao"]);
+
+  await c.rodar(["Notification"], JSON.stringify({ session_id: "m4", notification_type: "permission_prompt" }), env, f);
+  await c.rodar(["PostToolUse"], pos, env, f);
+  assert.deepEqual(corpos.map((x) => x.evento), ["execucao", "precisa_de_voce", "ferramenta", "execucao"]);
 });
