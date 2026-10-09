@@ -8,10 +8,12 @@ permissão nem manda comando para a máquina de ninguém.
 ## Como instalar
 
 O plugin vem ligado para todo o time da VALK pela sincronização da organização, mas
-fica quieto até ganhar uma chave. Para começar a aparecer no escritório, rode
-`/plugin configure escritorio@valk` (ou `/plugin` → Instalados → escritorio → Configurar
-opções), preencha a **Chave do escritório** e abra uma sessão nova. Pela linha de comando:
-`echo '{"chave":"valk_coletor_..."}' | claude plugin configure escritorio@valk --values-stdin`.
+fica quieto até ganhar uma chave. Para começar a aparecer no escritório, rode `/plugin`,
+abra **Instalados** → **Escritório dos agentes** → **Configurar opções**, preencha a
+**Chave do escritório**, feche o Claude Code e abra de novo. Pela linha de comando, use o id
+que `claude plugin list` mostra (`escritorio@synced` quando veio da organização,
+`escritorio@valk` quando foi instalado na mão):
+`echo '{"chave":"valk_coletor_..."}' | claude plugin configure escritorio@synced --values-stdin`.
 Fora da organização, instale na mão:
 
 ```
