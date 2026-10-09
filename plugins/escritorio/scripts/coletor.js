@@ -457,8 +457,10 @@ async function rodar(argv, stdin, env, fetchImpl) {
       if (!retomada && !execucao) return { enviado: false, motivo: "ignorado" };
       let ultimo = null;
       if (retomada) {
-        // Sem atividade: o hub só move a sessão para "trabalhando".
+        // Leva o rótulo limpo da ferramenta que acabou de rodar: sem ele, o balão
+        // continuaria dizendo "Precisa de você" até a próxima ferramenta.
         const corpo = { sessao, evento: "ferramenta", instante };
+        if (entrada.tool_name) corpo.atividade = sanitizar(entrada.tool_name, entrada.tool_input || {});
         const projeto = nomeDoProjeto(entrada.cwd || process.cwd());
         if (projeto) corpo.projeto = cortar(projeto, 80);
         ultimo = { enviado: await enviar(corpo), corpo };

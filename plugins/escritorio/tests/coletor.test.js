@@ -357,7 +357,7 @@ test("hooks.json: matchers de Notification e PostToolUse", () => {
   assert.equal(h.PostToolUse[0].hooks[0].async, true);
 });
 
-test("a mão: sobe com precisa_de_voce, desce no PostToolUse com ferramenta sem atividade", async () => {
+test("a mão: sobe com precisa_de_voce, desce no PostToolUse com o rótulo limpo da ferramenta que rodou", async () => {
   const env = ambiente({ CLAUDE_PLUGIN_OPTION_CHAVE: "k" });
   const corpos = [];
   const f = async (_u, init) => {
@@ -377,14 +377,14 @@ test("a mão: sobe com precisa_de_voce, desce no PostToolUse com ferramenta sem 
   assert.equal(corpos.length, 1);
   assert.equal(corpos[0].evento, "precisa_de_voce");
 
-  // ferramenta aprovada termina: manda ferramenta sem atividade, uma vez só
+  // ferramenta aprovada termina: manda ferramenta com o rótulo limpo, uma vez só
   const r = await c.rodar(["PostToolUse"], pos, env, f);
   assert.equal(r.enviado, true);
   assert.equal(corpos.length, 2);
   assert.equal(corpos[1].evento, "ferramenta");
   assert.equal(corpos[1].sessao, "m1");
-  assert.ok(!("atividade" in corpos[1]));
-  assert.ok(!JSON.stringify(corpos[1]).includes("saída"));
+  assert.deepEqual(corpos[1].atividade, { tipo: "test", rotulo: "Rodando os testes" });
+  assert.ok(!JSON.stringify(corpos[1]).includes("saída") && !JSON.stringify(corpos[1]).includes("npm"));
   assert.equal((await c.rodar(["PostToolUse"], pos, env, f)).motivo, "ignorado");
   assert.equal(corpos.length, 2);
 
