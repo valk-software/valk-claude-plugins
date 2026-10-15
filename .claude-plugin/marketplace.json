@@ -68,6 +68,21 @@
       "keywords": ["hub", "tarefas", "rotina", "valk"],
       "category": "development",
       "defaultEnabled": true
+    },
+    {
+      "name": "nome-da-sessao",
+      "source": "./plugins/nome-da-sessao",
+      "displayName": "Nome da sessão",
+      "description": "Nomeia as sessões no padrão da VALK: [Principal] para a sessão que orquestra, [Secundária] com o nome da sessão pai para as que ela abre.",
+      "version": "1.0.0",
+      "author": {
+        "name": "VALK",
+        "url": "https://valkbr.com"
+      },
+      "repository": "https://github.com/valk-software/valk-claude-plugins",
+      "keywords": ["sessoes", "nome", "subagentes", "valk"],
+      "category": "productivity",
+      "defaultEnabled": true
     }
   ]
 }

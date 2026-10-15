@@ -9,6 +9,7 @@ As ferramentas internas da VALK distribuídas para a organização no Claude.
 | [`opensquad`](plugins/opensquad) | O motor de squads de agentes: cria e roda squads de conteúdo, pesquisa e operação. |
 | [`fluxo-codificacao`](plugins/fluxo-codificacao) | O jeito VALK de programar com agentes: a sessão principal planeja e revisa, três subagentes fazem o trabalho braçal. |
 | [`rotina-do-hub`](plugins/rotina-do-hub) | Leva a rotina de tarefas do Valk Hub para toda sessão, local ou na nuvem. |
+| [`nome-da-sessao`](plugins/nome-da-sessao) | Nomeia as sessões: `[Principal]` para a que orquestra, `[Secundária]` com o nome da pai para as que ela abre. |
 
 ## A decisão que organiza este repositório
 
@@ -35,6 +36,7 @@ Enquanto a distribuição por organização não estiver ligada:
 /plugin install opensquad@valk
 /plugin install fluxo-codificacao@valk
 /plugin install rotina-do-hub@valk
+/plugin install nome-da-sessao@valk
 ```
 
 Depois de ligada, eles chegam sozinhos em quem é da VALK.
