@@ -8,6 +8,7 @@ As ferramentas internas da VALK distribuídas para a organização no Claude.
 |---|---|
 | [`opensquad`](plugins/opensquad) | O motor de squads de agentes: cria e roda squads de conteúdo, pesquisa e operação. |
 | [`fluxo-codificacao`](plugins/fluxo-codificacao) | O jeito VALK de programar com agentes: a sessão principal planeja e revisa, três subagentes fazem o trabalho braçal. |
+| [`rotina-do-hub`](plugins/rotina-do-hub) | Leva a rotina de tarefas do Valk Hub para toda sessão, local ou na nuvem. |
 
 ## A decisão que organiza este repositório
 
@@ -33,6 +34,7 @@ Enquanto a distribuição por organização não estiver ligada:
 /plugin marketplace add valk-software/valk-claude-plugins
 /plugin install opensquad@valk
 /plugin install fluxo-codificacao@valk
+/plugin install rotina-do-hub@valk
 ```
 
 Depois de ligada, eles chegam sozinhos em quem é da VALK.
@@ -43,7 +45,7 @@ Ato de tela, feito uma vez, por quem é **Owner** da organização no Claude.
 
 1. Abrir **Organization settings > Plugins**.
 2. Apontar para este repositório: `valk-software/valk-claude-plugins`.
-3. Deixar o `opensquad` e o `fluxo-codificacao` como **instalados por padrão**,
+3. Deixar o `opensquad`, o `fluxo-codificacao` e o `rotina-do-hub` como **instalados por padrão**,
    e **não** como obrigatórios.
 4. Esperar a sincronização. Ela dispara quando uma versão nova entra na `main` e
    leva **até 30 minutos** para chegar em todo mundo.
