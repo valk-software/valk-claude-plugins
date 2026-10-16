@@ -6,7 +6,7 @@ As ferramentas internas da VALK distribuídas para a organização no Claude.
 
 | Plugin | O que é |
 |---|---|
-| [`opensquad`](plugins/opensquad) | O motor de squads de agentes: cria e roda squads de conteúdo, pesquisa e operação. |
+| [`opensquad`](plugins/opensquad) | O motor de squads de agentes: cria e roda squads de conteúdo, pesquisa e operação. Traz a [`pesquisa-instagram`](plugins/opensquad/scripts/pesquisa-instagram), que lê perfis, reels, hashtags e músicas sem login, só para pesquisa de pauta (adaptada do omkarcloud/instagram-scraper, MIT; viola os termos da Meta se usada em volume e quebra sem aviso). |
 | [`fluxo-codificacao`](plugins/fluxo-codificacao) | O jeito VALK de programar com agentes: a sessão principal planeja e revisa, três subagentes fazem o trabalho braçal. |
 | [`rotina-do-hub`](plugins/rotina-do-hub) | Leva a rotina de tarefas do Valk Hub para toda sessão, local ou na nuvem. |
 | [`nome-da-sessao`](plugins/nome-da-sessao) | Nomeia as sessões: `[Principal]` para a que orquestra, `[Secundária]` com o nome da pai para as que ela abre. |

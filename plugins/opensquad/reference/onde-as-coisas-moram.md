@@ -25,6 +25,7 @@ Isto é motor. Muda uma vez por mês, e chega por atualização do plugin.
 | Persona do arquiteto | `${CLAUDE_PLUGIN_ROOT}/reference/architect.agent.yaml` |
 | Best-practices por formato | `${CLAUDE_PLUGIN_ROOT}/reference/best-practices/{formato}.md` |
 | Analisador de vídeo de referência | `${CLAUDE_PLUGIN_ROOT}/scripts/ref-analyzer/` |
+| Pesquisa de referência no Instagram | `${CLAUDE_PLUGIN_ROOT}/scripts/pesquisa-instagram/` |
 
 Sempre `${CLAUDE_PLUGIN_ROOT}`, nunca caminho relativo ao projeto: um plugin roda
 a partir de qualquer pasta, inclusive de uma pasta vazia.
@@ -47,7 +48,8 @@ navegador é o olho; o arquivo é da casa.
 **Leia, nunca escreva.** A pasta do plugin é substituída inteira a cada
 atualização: o que você gravar aqui some sem aviso na próxima versão. Isso vale
 inclusive para a saída do `ref-analyzer`, que por isso cai na pasta de onde
-você rodou (`./ref-analyzer/`) e não ao lado do script.
+você rodou (`./ref-analyzer/`) e não ao lado do script, e para o cache da
+`pesquisa-instagram`, que cai em `./pesquisa-instagram-cache/`.
 
 ## O que vem do HUB (muda toda semana, igual para todo mundo, na hora)
 
