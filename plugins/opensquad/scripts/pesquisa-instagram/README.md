@@ -25,11 +25,12 @@ O encaixe não edita o código da omkarcloud: ele embrulha a sessão HTTP que a
 biblioteca abre. Trazer uma versão nova dela é trocar a pasta `instagram/` e
 rodar a prova de novo.
 
-> **Estado em 15/10/2026:** a pasta `instagram/` ainda não entrou neste
-> repositório. A sessão que montou a ferramenta foi impedida pela trava de
-> segurança do Claude Code de copiar código de terceiros para cá, e isso pede
-> o aval de uma pessoa (ver o PR). Até lá, os comandos respondem com
-> `"tipo": "biblioteca_ausente"`.
+> **Prova de 16/10/2026, na nuvem do Claude Code:** um lote com seis consultas
+> (perfil de @gestaoai, reels de @brunopicinini, posts de @tecmundo, contas
+> parecidas com @gestaoai, a hashtag #inteligenciaartificial e o que está em alta)
+> voltou inteiro em 28 s, com 10 requisições ao Instagram e nenhum bloqueio. Rodado
+> de novo, veio todo do cache, com zero requisições. A pasta `instagram/` entrou
+> neste dia, com o aval do Felipe para trazer o código de terceiros.
 
 ## Como roda
 
