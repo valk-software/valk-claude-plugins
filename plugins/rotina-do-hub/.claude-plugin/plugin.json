@@ -1,7 +1,7 @@
 {
   "name": "rotina-do-hub",
   "displayName": "Rotina do agente no Hub",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Lembra toda sessão de registrar no Valk Hub o trabalho que vira commit: tarefa em doing antes de editar, done com horas quando está no ar.",
   "author": {
     "name": "VALK",
