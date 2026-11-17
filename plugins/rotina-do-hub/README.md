@@ -54,6 +54,12 @@ quanto cada tarefa custou dentro do que a VALK paga pelas licenças (#1468). Ele
 **só números**: ids, modelo, tokens e a tarefa em que cada trecho foi gasto. Nunca texto de conversa, e-mail ou
 caminho de pasta. Ele sai sempre com 0 e nunca trava o fim da sessão.
 
+**Desde 1.2.0, também a cada resposta** (gancho `Stop`, com `--parcial`): só o fim da sessão não bastava, porque
+as sessões duram dias e muitas fecham sem ele (de 12 a 17/11 o hub recebeu um registro). O parcial roda no máximo
+a cada 10 minutos por sessão, manda só o que a máquina ainda não mandou (os ids ficam em
+`~/.claude/valk-consumo-de-ia-enviados/`) e segura por 6 horas o trecho sem tarefa, que pode ganhar a tarefa pelo
+`Ref #N` de um commit posterior. As regras estão em `scripts/consumo-de-ia/selecao.mjs`.
+
 Sem chave, ele não manda nada. Para a sua máquina ser medida, com o Claude Code logado na sua conta:
 
 ```

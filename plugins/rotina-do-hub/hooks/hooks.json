@@ -1,5 +1,5 @@
 {
-  "description": "Lembrete da rotina do agente no Valk Hub, no início da sessão, e o consumo de IA da sessão, no fim. Nenhum dos dois bloqueia nada.",
+  "description": "Lembrete da rotina do agente no Valk Hub, no início da sessão, e o consumo de IA da sessão, a cada resposta (no máximo a cada 10 minutos) e no fim. Nenhum dos dois bloqueia nada.",
   "hooks": {
     "SessionStart": [
       {
@@ -11,6 +11,21 @@
               "${CLAUDE_PLUGIN_ROOT}/scripts/session-start.js"
             ],
             "timeout": 10
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node",
+            "args": [
+              "${CLAUDE_PLUGIN_ROOT}/scripts/consumo-de-ia/enviar.mjs",
+              "--parcial"
+            ],
+            "timeout": 60
           }
         ]
       }
